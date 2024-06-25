@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[ -f "manage.py" ]];
+if [ -f "manage.py" ];
 then
     echo found
 else
