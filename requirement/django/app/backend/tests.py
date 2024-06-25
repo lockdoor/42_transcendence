@@ -50,6 +50,24 @@ class LoginTest(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()['error'], 'Invalid username or password')
     
+    def test_duplicate_login(self):
+        """
+            If user login 2 times with the same session 
+        """
+        User = get_user_model()
+        user = User.objects.create_user(username="user1234", password="password1234")
+        payload = {
+            "username": "user1234",
+            "password": "password1234"
+        }
+        for i in range(2):        
+            response = self.client.post(
+            self.login_url, 
+            json.dumps(payload),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'User is already logged in')
     def test_login_with_method_not_allowed(self):
         """
             If login with invalid username should return 405
