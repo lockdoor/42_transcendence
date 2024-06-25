@@ -3,8 +3,6 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login, logout, get_user_model
 
-
-
 # Create your views here.
 def UserLogin(request):
     if request.method == 'POST':
@@ -22,3 +20,16 @@ def UserLogin(request):
         return JsonResponse({'message': 'Login success'}, status=200)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def UserLogout(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            User = get_user_model()
+            user = User.objects.get(id=request.user.id)
+            user.is_online = False
+            user.save()
+            logout(request)
+            return JsonResponse({'message': 'Logout success'}, status=200)
+        else:
+            return JsonResponse({'message': 'User is not logged in'}, status=401)
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

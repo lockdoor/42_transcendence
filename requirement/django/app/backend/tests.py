@@ -25,10 +25,10 @@ class LoginTest(TestCase):
             self.login_url, 
             json.dumps(payload),
             content_type='application/json')
-        is_online_user = User.objects.get(username="user1234")
+        updated_user = User.objects.get(username="user1234")
  
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(is_online_user.is_online , True)
+        self.assertEqual(updated_user.is_online , True)
         
     def test_login_with_invalid_username(self):
         """
@@ -55,3 +55,45 @@ class LoginTest(TestCase):
         response = self.client.get(self.login_url,)
 
         self.assertEqual(response.status_code, 405)
+
+class LogoutTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.client2 = Client()
+        self.logout_url ='/api/auth/logout'
+        self.login_url = '/api/auth/login'
+        
+        User = get_user_model()
+        self.user = User.objects.create_user(username="user1234", password="password1234")
+        self.payload = {
+            "username": "user1234",
+            "password": "password1234"
+        }
+        self.client.post(
+            self.login_url, 
+            json.dumps(self.payload),
+            content_type='application/json')
+
+    def test_logout_success(self):
+        """
+            If logout success should return 200
+        """
+        response = self.client.post(self.logout_url, content_type='application/json')
+        
+        User = get_user_model()
+        updated_user = User.objects.get(username="user1234")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(updated_user.is_online, False)
+
+    def test_logout_failed(self):
+        """
+            If logout before login should return 401
+        """
+        response = self.client2.post(self.logout_url, content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+    def test_logout_with_method_not_allowed(self):
+        """
+            If logout with method other than POST should return 405
+        """
+        response = self.client.get(self.logout_url)
