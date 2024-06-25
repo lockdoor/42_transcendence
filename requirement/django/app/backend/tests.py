@@ -28,6 +28,7 @@ class LoginTest(TestCase):
         updated_user = User.objects.get(username="user1234")
  
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Login success')
         self.assertEqual(updated_user.is_online , True)
         
     def test_login_with_invalid_username(self):
@@ -47,14 +48,15 @@ class LoginTest(TestCase):
             content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['error'], 'Invalid username or password')
     
     def test_login_with_method_not_allowed(self):
         """
             If login with invalid username should return 405
         """
         response = self.client.get(self.login_url,)
-
         self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.json()['error'], 'Method not allowed')
 
 class LogoutTest(TestCase):
     def setUp(self):
@@ -79,10 +81,10 @@ class LogoutTest(TestCase):
             If logout success should return 200
         """
         response = self.client.post(self.logout_url, content_type='application/json')
-        
         User = get_user_model()
         updated_user = User.objects.get(username="user1234")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Logout success')
         self.assertEqual(updated_user.is_online, False)
 
     def test_logout_failed(self):
@@ -91,9 +93,12 @@ class LogoutTest(TestCase):
         """
         response = self.client2.post(self.logout_url, content_type='application/json')
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['error'], 'User is not logged in')
 
     def test_logout_with_method_not_allowed(self):
         """
             If logout with method other than POST should return 405
         """
         response = self.client.get(self.logout_url)
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.json()['error'], 'Method not allowed')

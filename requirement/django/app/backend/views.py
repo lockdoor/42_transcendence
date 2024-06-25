@@ -32,5 +32,5 @@ def UserLogout(request):
             logout(request)
             return JsonResponse({'message': 'Logout success'}, status=200)
         else:
-            return JsonResponse({'message': 'User is not logged in'}, status=401)
+            return JsonResponse({'error': 'User is not logged in'}, status=401)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
