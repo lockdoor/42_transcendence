@@ -1,0 +1,63 @@
+version: '3.1'
+
+services:
+  django:
+    build: 
+      context: ./requirement/django
+      dockerfile: dockerfile
+    container_name: django
+    image: transcendence-django
+    ports:
+      - 8000:8000
+    volumes:
+      - ./requirement/django/app:/usr/src/app/
+    depends_on:
+      - redis
+    networks:
+      - app
+  
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - app
+
+  # postgres:
+  #   build:
+  #     context: ./requirement/postgres
+  #     dockerfile: dockerfile
+  #     args:
+  #       MYUID: ${MYUID}
+  #   container_name: postgres
+  #   # image: postgres
+  #   volumes:
+  #     - ./requirement/postgres/database:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=password
+  #     - PGDATA=/var/lib/postgresql/data/pgdata
+  #   networks:
+  #     - app
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   ports:
+  #     - 81:80
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=lockdoor@gmail.com
+  #     - PGADMIN_DEFAULT_PASSWORD=password
+  #   networks:
+  #     - app
+    
+
+  # client1:
+  #   build:
+  #     context: ./requirement/client1
+  #     dockerfile: dockerfile
+  #   container_name: client1
+  #   image: client1
+  #   networks:
+  #     - app
+
+networks:
+  app:
