@@ -6,3 +6,6 @@ build:
 
 down:
 	docker compose -f docker-compose.yaml down
+
+test:
+	python3 requirement/django/app/manage.py test backend
