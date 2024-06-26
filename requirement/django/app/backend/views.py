@@ -34,7 +34,7 @@ def UserLogin(request):
             return JsonResponse({'error': 'User is already logged in'}, status=400)
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar.url}'
+            avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
             if avatar_url and os.path.exists(avatar_url):
                 pass
             else:
@@ -119,7 +119,7 @@ def UpdateUserAvatar(request, user_id):
                 avatar = request.FILES.get('avatar')
                 if avatar:
                     old_avatar_path = user.avatar
-                    if old_avatar_path != 'avatars/default.jpg' and os.path.isfile(f'{settings.MEDIA_ROOT}/{old_avatar_path}'):
+                    if old_avatar_path != f'avatars/default.png' and os.path.isfile(f'{settings.MEDIA_ROOT}/{old_avatar_path}'):
                         os.remove(f'{settings.MEDIA_ROOT}/{old_avatar_path}')
                     user.avatar = avatar
                     user.save()
