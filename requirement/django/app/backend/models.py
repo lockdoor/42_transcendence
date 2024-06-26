@@ -32,6 +32,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    friend = models.ManyToManyField('self')
+    
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
@@ -40,3 +42,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 ############################## For Custom Auth User ##############################
+
+############################## Notification ##############################
+class Notification(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='senders')
+    accepter = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='accpeters')
+    date = models.DateTimeField(auto_now_add=True, null=True)
+    class Meta:
+        unique_together = ('sender', 'accepter')
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.accepter.username}"
+############################## Notification ##############################
