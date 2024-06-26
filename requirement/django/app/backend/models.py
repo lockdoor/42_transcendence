@@ -26,7 +26,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(blank=True, null=True)
     score = models.IntegerField(default=0)
-    avatar = models.FileField(upload_to='avatars', blank=True, null=True)
+    avatar = models.FileField(upload_to='avatars', blank=True, null=True, default='avatars/default.png')
     # avatar = models.ImageField(upload_to='avatars', blank=True, null=True)
     is_online = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

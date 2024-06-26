@@ -5,8 +5,13 @@ from django.contrib.sessions.models import Session
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login, logout, get_user_model
 
+DEFAULT_AVATAR = 'uploads/default.png'
+
 def index(request):
     return render(request, 'backend/login.html')
+
+def user_register(request):
+    return render(request, 'backend/register.html')
 
 #1.1 /api/auth/login
 def UserLogin(request):
@@ -25,6 +30,29 @@ def UserLogin(request):
         else:
             return JsonResponse({'error': 'Invalid username or password'}, status=401)    
         return JsonResponse({'message': 'Login success'}, status=200)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+#1.2 /api/auth/register
+def UserRegister(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        avatar = request.FILES.get('avatar')
+        
+        if not username or not password:
+            return JsonResponse({'error': 'Both username and password are required'}, status=400)
+       
+        User = get_user_model()
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username already exists'}, status=400)
+
+        user = User.objects.create_user(username=username, password=password)
+        if avatar:
+            user.avatar = avatar
+        user.save()
+        
+        return JsonResponse({'message': 'Create user success'}, status=201)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 

@@ -1,0 +1,7 @@
+.DS_Store
+
+# Ignore all files in uploads/avatars
+requirement/django/app/uploads/avatars/*
+
+# Except for default.jpg
+!requirement/django/app/uploads/avatars/default.png
