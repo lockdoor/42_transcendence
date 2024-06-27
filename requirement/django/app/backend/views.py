@@ -86,13 +86,14 @@ def UserLogout(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 #2.1.1 /api/users/:user_id/profile
-def getUserProfile(User, user):
+def getUserProfile(User, user):        
     return( {
         'id': user.id,
         'username': user.username,
         'avatar': user.avatar.url,
         'is_online': user.is_online
     })
+        
 
 def UserProfile(request, user_id):
     if request.method == 'GET':
@@ -100,8 +101,12 @@ def UserProfile(request, user_id):
             if request.user.is_authenticated:
                 User = get_user_model()
                 user = User.objects.get(id = user_id)
-                payload = getUserProfile(User=User, user=user)
-                return JsonResponse(payload, status=200)
+                avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
+                if avatar_url and os.path.exists(avatar_url):
+                    payload = getUserProfile(User=User, user=user)
+                else:
+                    return JsonResponse({'error': 'Not Found the avatar file'}, status=404) 
+                return JsonResponse(payload, status=200, safe=False)
             else:
                 return JsonResponse({'message': 'User is not logged in'}, status=401)
         except User.DoesNotExist:
