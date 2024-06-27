@@ -15,8 +15,6 @@ http://127.0.0.1:8000/api/user_register
 http://127.0.0.1:8000/api
 ```
 
-# Hello from prem
-
 
 ## API-DOC
 ```
