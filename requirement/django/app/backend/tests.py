@@ -323,7 +323,7 @@ class GetNotificationTest(TestCase):
                     'is_online': True
                 }
             ]
-        # print(response.json())
+        print(response.json())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), expected_load)
 
