@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Link to your CSS file for styling -->
+</head>
+<body>
+    <div class="container">
+        {% if request.user.is_authenticated %}
+            <h2>Welcome</h2>
+            <img src="{{request.user.avatar.url}}">
+            <h2>{{ request.user.username }}</h2>
+            <form id="logoutForm" method="post" action="{% url 'userLogout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        {% else %}
+            <h2>Login</h2>
+            <form id="loginForm" method="post" action="{% url 'userLogin' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="message">
+                {% if error %}
+                    <p>{{ error }}</p>
+                {% endif %}
+                {% if message %}
+                    <p>{{ message }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('{% url "userLogin" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle response data here
+                const messageDiv = document.getElementById('message');
+                if (data.message) {
+                    messageDiv.innerHTML = `<p>${data.message}</p>`;
+                } else if (data.error) {
+                    messageDiv.innerHTML = `<p>${data.error}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('logoutForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('{% url "userLogout" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle response data here
+                const messageDiv = document.getElementById('message');
+                if (data.message) {
+                    messageDiv.innerHTML = `<p>${data.message}</p>`;
+                } else if (data.error) {
+                    messageDiv.innerHTML = `<p>${data.error}</p>`;
+                }
+                if (data.message === 'Logout success') {
+                    location.reload(); // Reload the page after logout
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

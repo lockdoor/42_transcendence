@@ -8,7 +8,6 @@ else
     python manage.py startapp backend
     python manage.py startapp frontend
     python manage.py startapp chat
-    python manage.py migrate
 fi
 
 exec "$@"
