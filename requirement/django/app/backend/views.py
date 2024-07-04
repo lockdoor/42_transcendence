@@ -12,7 +12,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 DEFAULT_AVATAR = f'avatars/default.png'
 
 def get_csrf_token_and_session_id(request):
-    csrf_token = get_token(request)
+    # csrf_token = get_token(request)
     session_id = request.session.session_key
     return JsonResponse({'csrf_token': csrf_token, 'sessionid': session_id}, status=200)
 
@@ -23,12 +23,28 @@ def index(request):
 def user_register(request):
     return render(request, 'backend/register.html')
 
+# 2fa setup (auth-ed)
+# - POST /api/auth/totp
+# secert = totp.base32()
+# code = pyotp.gen(secret)
+
+# 2fa verify 2fa
+
+
 #1.1 /api/auth/login
 def UserLogin(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
+        # if 2fa is enable then redirect to 2fa page with url like
+        # localhost/auth/mfa-totp/?token=fu1g3o48vg1o34ugvo28u34goucg34ou8vgqo38y4voqu8y3g4g&userid=2014
+
+        # payload : {
+        #     code: 123456,
+        #     token:
+        #     user: 
+        # }
 
         if request.user.is_authenticated:
             return JsonResponse({'error': 'User is already logged in'}, status=400)

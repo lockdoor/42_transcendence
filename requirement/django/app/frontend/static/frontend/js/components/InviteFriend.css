@@ -1,0 +1,103 @@
+#invite-friend {
+	margin-top: 2vh;
+	height: 70vh;
+	min-height: 38rem;
+	background-color: white;
+	border-radius: 0.75rem;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+	/* background-color: rgb(106, 106, 199); */
+}
+
+#header {
+	padding-top: 1px;
+	padding-left: 20px;
+	color: #4FD1C5;
+}
+
+table {
+	width: 100%;
+	border-radius: 0.75rem;
+	padding-left: 10vw;
+	padding-right: 10vw;
+	text-align: center;
+}
+
+table tbody td {
+	font-size: 0.8rem;
+	height: 3rem;
+	border-bottom: 1px solid rgba(132, 139, 200, 0.18);
+	color: #677483;
+	padding-left: 2vw; 
+}
+
+table tbody tr:first-child td {
+	border-top: 1px solid rgba(132, 139, 200, 0.18);
+}
+
+#profile {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+#profile #profile-photo {
+	width: 2.7rem;
+	height: 2.7rem;
+	border-radius: 0.75rem;
+	overflow: hidden; 
+	position: relative; 
+}
+
+#profile #profile-photo img {
+	display: block; /* Remove default inline spacing */
+	width: 100%; 
+	height: 100%; 
+	object-fit: cover; /* Ensure the image covers the container */
+	object-position: center; /* Center the image */
+}
+
+button {
+	margin-top: 0rem;
+	width: 7rem;
+	height: 2rem;
+	text-align: center;
+	border-radius: 0.75rem;
+	padding: 1rem 1;
+	background-color: #4FD1C5;
+	border-color: #4FD1C5;
+	font-size: 0.9rem;
+	color: white;
+}
+
+i {
+	font-size: 1.2rem;
+	color: white;
+}
+
+.status-ready {
+	color: white;
+	height: 2rem;
+	width: 5rem;
+	margin: 0;
+	padding: 2px;
+	background: #4FD1C5;
+	border-radius: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+}
+
+.status-waiting {
+	color: white;
+	height: 2rem;
+	width: 5rem;
+	margin: 0;
+	padding: 2px;
+	background: #CBD5E0;
+	border-radius: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+}
