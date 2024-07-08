@@ -19,9 +19,11 @@ import { BlockedList } from "./components/BlockedList.js";
 import { InviteFriend } from "./components/InviteFriend.js";
 import { LoginModal } from "./components/LoginModal.js";
 import { RegisterModal } from "./components/RegisterModal.js";
+import { ModalDialog } from "./components/newModal.js";
 
-customElements.define("register-modal",RegisterModal);
-customElements.define("login-modal",LoginModal);
+customElements.define("modal-dialog", ModalDialog);
+customElements.define("register-modal", RegisterModal);
+customElements.define("login-modal", LoginModal);
 customElements.define("block-list", BlockedList);
 customElements.define("invite-friend", InviteFriend);
 customElements.define("statis-tic", Statistic);
@@ -43,20 +45,27 @@ customElements.define("tournament-ongoing", TournamentOngoing);
 customElements.define("tournament-upcoming", TournamentUpcoming);
 
 export function navigateToForMainPage(path) {
-	const container = document.querySelector("main-page");
+  const container = document.querySelector("main-page");
 
-	if (path.indexOf("dashboard-page") > 0) {
-		if (container.shadowRoot.hasChildNodes())
-			container.shadowRoot.removeChild(container.shadowRoot.firstChild);
-		const textElement = document.createElement("dashBoard-page");
-		container.shadowRoot.appendChild(textElement);
-	} else if (path.indexOf("first-page") > 0) {
-		if (container.shadowRoot.hasChildNodes())
-			container.shadowRoot.removeChild(container.shadowRoot.firstChild);
-		const textElement = document.createElement("first-page");
-		container.shadowRoot.appendChild(textElement);
-	}
+  if (path.indexOf("dashboard-page") > 0) {
+    if (container.shadowRoot.hasChildNodes())
+      container.shadowRoot.removeChild(container.shadowRoot.firstChild);
+    const textElement = document.createElement("dashBoard-page");
+    container.shadowRoot.appendChild(textElement);
+  } else if (path.indexOf("first-page") > 0) {
+    if (container.shadowRoot.hasChildNodes())
+      container.shadowRoot.removeChild(container.shadowRoot.firstChild);
+    const textElement = document.createElement("first-page");
+    container.shadowRoot.appendChild(textElement);
+  }
 }
 
-navigateToForMainPage("/first-page")
+// window.show_modal = () => {
+//   document
+//     .querySelector("modal-dialog")
+//     .shadowRoot.querySelector(".modal")
+//     .setAttribute("open", "open");
+// };
+
+navigateToForMainPage("/first-page");
 // navigateToForMainPage("/dashboard-page");
