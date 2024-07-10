@@ -11,6 +11,20 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file
+env_file_path = '.env'  # Adjust the path if needed
+load_dotenv(env_file_path)
+
+# Retrieve environment variables
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+AUTHORIZATION_URL = os.getenv("AUTHORIZATION_URL")
+TOKEN_URL = os.getenv("TOKEN_URL")
+REDIRECT_URI = os.getenv("REDIRECT_URI")
+PROFILE_URL = os.getenv("PROFILE_URL")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -131,3 +145,14 @@ MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/user-media/'
 
 ALLOW_API_WITHOUT_AUTH = False
+
+# ##For 42 OAuth
+# ENV_FILE = find_dotenv()
+# if ENV_FILE:
+#     load_dotenv(ENV_FILE)
+
+# CLIENT_ID = os.environ.get("CLIENT_ID")
+# CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+# AUTHORIZATION_URL = os.environ.get("AUTHORIZATION_URL")
+# TOKEN_URL = os.environ.get("TOKEN_URL")
+# REDIRECT_URI = os.environ.get("REDIRECT_URI")
