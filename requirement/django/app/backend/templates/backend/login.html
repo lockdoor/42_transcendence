@@ -30,7 +30,11 @@
                 </div>
                 <button type="submit">Login</button>
             </form>
-            <p><a href="{% url 'userLogin42' %}">Login with 42 Account</a></p>
+            <form id="loginForm" method="post" action="{% url 'userLogin42' %}">
+                {% csrf_token %}
+                <p></p>
+                <button type="submit">Login with 42 Account</button>
+            </form>
             <div id="message">
                 {% if error %}
                     <p>{{ error }}</p>

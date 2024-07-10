@@ -115,7 +115,43 @@ def UserLogout(request):
             return JsonResponse({'message': 'Logout success'}, status=200)
         else:
             return JsonResponse({'error': 'User is not logged in'}, status=401)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+#1.4 /api/auth/login42
+def UserLogin42(request):
+    if request.method == 'POST':
+        client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
+        authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
+        request.session['oauth_state'] = state
+        return redirect(authorization_url)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def callback(request):
+    User = get_user_model()
+    # Fetch user info to Register
+    client = OAuth2Session(settings.CLIENT_ID, 
+                           state=request.session['oauth_state'], 
+                           redirect_uri=settings.REDIRECT_URI
+                           )
+    request.session['oauth_token'] = client.fetch_token(settings.TOKEN_URL, 
+                               client_secret=settings.CLIENT_SECRET, 
+                               authorization_response=request.build_absolute_uri()
+                               )
+    user_info = client.get(settings.PROFILE_URL).json()
+    username = user_info['login']
+    user_id = user_info['id']
+    hash_password = make_password(f'{username}{user_id}')
+    # request.session['userinfo'] = user_info
+    if User.objects.filter(username=username).exists():
+        user = User.objects.get(username=username)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+    else:
+        user = User.objects.create_user(username=username, password=hash_password)
+    login(request, user)
+    
+    return JsonResponse({'message': 'Login success'}, status=200)
+
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):
@@ -432,35 +468,3 @@ def DeleteNotification(request, user_id):
 
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-def UserLogin42(request):
-    client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
-    authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
-    request.session['oauth_state'] = state
-    return redirect(authorization_url)
-
-def callback(request):
-    User = get_user_model()
-    # Fetch user info to Register
-    client = OAuth2Session(settings.CLIENT_ID, 
-                           state=request.session['oauth_state'], 
-                           redirect_uri=settings.REDIRECT_URI
-                           )
-    request.session['oauth_token'] = client.fetch_token(settings.TOKEN_URL, 
-                               client_secret=settings.CLIENT_SECRET, 
-                               authorization_response=request.build_absolute_uri()
-                               )
-    user_info = client.get(settings.PROFILE_URL).json()
-    username = user_info['login']
-    user_id = user_info['id']
-    hash_password = make_password(f'{username}{user_id}')
-    # request.session['userinfo'] = user_info
-
-    if User.objects.filter(username=username).exists():
-        user = User.objects.get(username=username)
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-    else:
-        user = User.objects.create_user(username=username, password=hash_password)
-    login(request, user)
-    return JsonResponse({'message': 'Login success'}, status=200)
