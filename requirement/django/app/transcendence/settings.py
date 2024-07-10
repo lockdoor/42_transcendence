@@ -129,3 +129,5 @@ AUTH_USER_MODEL = 'backend.CustomUser'
 
 MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/user-media/'
+
+ALLOW_API_WITHOUT_AUTH = False
