@@ -19,9 +19,9 @@ import { BlockedList } from "./components/BlockedList.js";
 import { InviteFriend } from "./components/InviteFriend.js";
 import { LoginModal } from "./components/LoginModal.js";
 import { RegisterModal } from "./components/RegisterModal.js";
-import { ModalDialog } from "./components/newModal.js";
+// import { ModalDialog } from "./components/newModal.js";
 
-customElements.define("modal-dialog", ModalDialog);
+// customElements.define("modal-dialog", ModalDialog);
 customElements.define("register-modal", RegisterModal);
 customElements.define("login-modal", LoginModal);
 customElements.define("block-list", BlockedList);
