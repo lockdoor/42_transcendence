@@ -1,36 +1,36 @@
 const Mock_list = [
-  {
-    name: "Sarah",
-    profileImg: "./static/frontend/images/profile-2.jpg",
-    status: "Online",
-  },
-  {
-    name: "Jenny",
-    profileImg: "./static/frontend/images/profile-2.jpg",
-    status: "Offline",
-  },
-  {
-    name: "Lin",
-    profileImg: "./static/frontend/images/profile-2.jpg",
-    status: "Offline",
-  },
-  {
-    name: "Kim",
-    profileImg: "./static/frontend/images/profile-2.jpg",
-    status: "Online",
-  },
+	{
+		name: 'Sarah',
+		profileImg: '../images/profile-2.jpg',
+		status: 'Online'
+	},
+	{
+		name: 'Jenny',
+		profileImg: '../images/profile-2.jpg',
+		status: 'Offline'
+	},
+	{
+		name: 'Lin',
+		profileImg: '../images/profile-2.jpg',
+		status: 'Offline'
+	},
+	{
+		name: 'Kim',
+		profileImg: '../images/profile-2.jpg',
+		status: 'Online'
+	}
 ];
 
 import { changeNotification } from "./Utils.js";
 
 export class Friends extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
+	constructor() {
+		super();
+		this.attachShadow({ mode: "open" });
+	}
 
-  template = () => {
-    return `
+	template = () => {
+		return `
 			<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
 			<link rel="stylesheet" href="./static/frontend/js/components/friends.css">
 			
@@ -48,11 +48,10 @@ export class Friends extends HTMLElement {
 				</table>
 			</div>
 		`;
-  };
+	};
 
-  generateRows() {
-    return Mock_list.map(
-      (list) => `
+	generateRows() {
+		return Mock_list.map(list => `
 			<tr>
 				<td>
 					<div id="profile">
@@ -65,13 +64,7 @@ export class Friends extends HTMLElement {
 					</div>
 				</td>
 				<td>
-					<p class="${
-            list.status === "Online"
-              ? "status-online"
-              : list.status === "Offline"
-              ? "status-offline"
-              : "status-offline"
-          }">
+					<p class="${list.status === 'Online' ? 'status-online' : list.status === 'Offline' ? 'status-offline' : 'status-offline'}">
 						${list.status}
 					</p>
 				</td>
@@ -83,29 +76,27 @@ export class Friends extends HTMLElement {
 					</div>
 				</td>
 			</tr>
-		`
-    ).join("");
-  }
+		`).join('');
+	}
 
-  connectedCallback() {
-    this.shadowRoot.innerHTML = this.template();
+	connectedCallback() {
+		this.shadowRoot.innerHTML = this.template();
 
-    this.shadowRoot
-      .querySelector("#findFriendsButton")
-      .addEventListener("click", () => {
-        changeNotification("recommends-friends");
-      });
+		this.shadowRoot.querySelector('#findFriendsButton').addEventListener('click', () => {
+			changeNotification("recommends-friends");
+		});
 
-    this.shadowRoot.querySelectorAll(".uil-user").forEach((icon) => {
-      icon.addEventListener("click", () => {
-        changeNotification("friend-profile");
-      });
-    });
+		this.shadowRoot.querySelectorAll('.uil-user').forEach(icon => {
+			icon.addEventListener('click', () => {
+				changeNotification("friend-profile");
+			});
+		});
 
-    this.shadowRoot.querySelectorAll(".uil-upload").forEach((icon) => {
-      icon.addEventListener("click", () => {
-        changeNotification("invite-friend");
-      });
-    });
-  }
+		this.shadowRoot.querySelectorAll('.uil-upload').forEach(icon => {
+			icon.addEventListener('click', () => {
+				changeNotification("invite-friend");
+			});
+		});
+	}
+
 }

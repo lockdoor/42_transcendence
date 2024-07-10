@@ -66,12 +66,11 @@ export class LoginModal extends HTMLElement {
 						console.log(res.json());
 					}
 				)
+			// after login can use login here;
+			
 			// const result = this.postUserAndPassword()
 			// navigateToForMainPage("/dashboard-page");
 		})
-		// this.shadowRoot.querySelector('#loginButton').addEventListener('click', () => {
-		// 	navigateToForMainPage("/dashboard-page");
-		// });
 	}
 
 	async checkUserAlreadyLogin(){
