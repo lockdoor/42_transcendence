@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.core.exceptions import ValidationError
 
 ############################## For Custom Auth User ##############################
 class CustomUserManager(BaseUserManager):
@@ -32,7 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
-    friend = models.ManyToManyField('self')
+    friend = models.ManyToManyField('self', through='Friendship')
     
     objects = CustomUserManager()
 
@@ -41,6 +42,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+    def add_friend(self, friend_user):
+        if friend_user == self:
+            raise ValidationError("Users cannot be friends with themselves.")
+        
+        Friendship.objects.create(from_user=self, to_user=friend_user)
+        Friendship.objects.create(from_user=friend_user, to_user=self)
 ############################## For Custom Auth User ##############################
 
 ############################## Notification ##############################
@@ -67,3 +75,15 @@ class BlockedList(models.Model):
         return f"{self.blocker.username} -> {self.blocked.username}"
 
 ############################## Block List ##############################
+
+############################## Friend List ##############################
+class Friendship(models.Model):
+    from_user = models.ForeignKey(CustomUser, related_name='from_users', on_delete=models.CASCADE, null=True)
+    to_user = models.ForeignKey(CustomUser, related_name='to_users', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+
+    def __str__(self):
+        return f"{self.from_user.username} -> {self.to_user.username}"
+############################## Friend List ##############################
