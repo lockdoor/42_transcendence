@@ -5,6 +5,8 @@ urlpatterns = [
     path("", views.index),
     path("user_register", views.user_register),
     path("auth/login", views.UserLogin, name="userLogin"),
+    path("auth/login42", views.UserLogin42, name="userLogin42"),
+    path("auth/callback", views.callback, name="callback"),
     path("auth/register", views.UserRegister, name="userRegister"),
     path("auth/logout", views.UserLogout, name="userLogout"),
     path("users/<int:user_id>/<int:owner_id>/profile", views.UserProfile, name="userProfile"),
