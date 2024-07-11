@@ -128,6 +128,9 @@ def UserLogin42(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 def callback(request):
+    if 'oauth_token' in request.session:
+        return JsonResponse({'error': 'User is already logged in'}, status=400)
+    
     stored_state = request.session.get('oauth_state')
     received_state = request.GET.get('state')
     if stored_state != received_state:
