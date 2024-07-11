@@ -128,12 +128,17 @@ def UserLogin42(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 def callback(request):
+    stored_state = request.session.get('oauth_state')
+    received_state = request.GET.get('state')
+    if stored_state != received_state:
+        return JsonResponse({'error': 'State mismatch. Possible CSRF attack.'}, status=400)
+    
     User = get_user_model()
-    # Fetch user info to Register
     client = OAuth2Session(settings.CLIENT_ID, 
                            state=request.session['oauth_state'], 
                            redirect_uri=settings.REDIRECT_URI
                            )
+    # Need to fetch access token for get 42User's Profile
     request.session['oauth_token'] = client.fetch_token(settings.TOKEN_URL, 
                                client_secret=settings.CLIENT_SECRET, 
                                authorization_response=request.build_absolute_uri()
