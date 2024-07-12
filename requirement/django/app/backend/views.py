@@ -76,7 +76,7 @@ def UserLogin(request):
             return JsonResponse({'error': 'Invalid username or password'}, status=401)    
         return JsonResponse({
                             'message': 'Login success',
-                            'owner_id': request.user.id
+                            'owner_id': user.id
                             }, status=200)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
