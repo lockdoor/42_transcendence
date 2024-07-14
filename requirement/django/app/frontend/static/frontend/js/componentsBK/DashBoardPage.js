@@ -1,49 +1,15 @@
-import { getCSRFToken } from "./utils.js"
-
 export class DashBoardPage extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
-		this.userData = {}
 	}
-
-	/*fetchUser = async() => {
-		try {
-			const csrfToken = getCSRFToken();
-			if (!csrfToken) {
-				throw new Error("CSRF token not found");
-			}
-
-			const owner_id = localStorage.get("owner_id")
-
-			const response = await fetch("api/users/:user_id/:owner_id/profile", {
-				method: 'GET',
-				credentials: "same-origin",
-				headers: {
-					"X-CSRFToken": csrfToken,
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(data),
-			});
-  
-		if (!response.ok) {
-			throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
-		}
-
-		const json = await response.json()
-			// console.log(json)
-			localStorage.setItem("owner_id", json.owner_id);
-		} catch (error) {
-			console.error('Error fetching friends:', error);
-		}
-	}*/
 
 	template = () => {
 		return `
 			<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
-			<link rel="stylesheet" href="${window.location.origin}/static/frontend/js/components/DashBoardPage.css">
+			<link rel="stylesheet" href="./static/frontend/js/components/DashBoardPage.css">
 				
-			<div id="navBar">
+			<div id="nav-bar">
 				<div id="container">
 					<div id="menu">
 						<i class="uil uil-bars"></i>
@@ -57,14 +23,14 @@ export class DashBoardPage extends HTMLElement {
 							<p><b>Prem</b></p>
 						</div>
 						<div id="profile-photo">
-							<!--img src="../images/profile-1.jpg" alt="Profile Photo"-->
+							<img src="../images/profile-1.jpg" alt="Profile Photo">
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<div id="div-content">
-				<profile-component id="proFile"></profile-component>
+				<pro-file id="pro-file"></pro-file>
 				<div id="div-middle">
 					<tour-na-ment></tour-na-ment>
 					<notifi-cation></notifi-cation>
@@ -87,7 +53,7 @@ export class DashBoardPage extends HTMLElement {
 	}
 
 	toggleProfileVisibility = () => {
-		const profile = this.shadowRoot.getElementById('proFile');
+		const profile = this.shadowRoot.getElementById('pro-file');
 		if (profile) {
 			profile.style.display = profile.style.display === 'none' ? 'block' : 'none';
 		}

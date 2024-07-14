@@ -1,0 +1,60 @@
+#container {
+	/* margin-top: -0.5rem; */
+	position: fixed;
+	top: 100px;
+}
+
+h3 {
+	font-size: 1.5rem;
+	color: #4FD1C5;
+}
+.gray {
+	color: #C4C4C4;
+}
+
+label {
+	clear: #2D3748;
+}
+
+.input-css {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 10rem;
+	font-size: 0.9rem;
+	color: #2D3748;
+	background: #F8F9FA;
+	border-radius: 0.75rem;
+	padding: 0.6rem 1rem;
+	border: 2px solid #4FD1C5;
+}
+
+.input-css::placeholder {
+	color: #C4C4C4;
+}
+
+#usernameCon {
+	margin-top: -0.5rem;
+}
+
+#passwordCon {
+	margin-bottom: 1rem;
+}
+
+#btn-42 {
+	margin-top: -10px;
+	margin-bottom: 0.5rem;
+}
+
+button {
+	margin-top: 0rem;
+	width: 10rem;
+	height: 2rem;
+	text-align: center;
+	border-radius: 0.75rem;
+	padding: 1rem 1;
+	background-color: #4FD1C5;
+	border-color: #4FD1C5;
+	font-size: 0.9rem;
+	color: white;
+	font-weight: bold;
+}

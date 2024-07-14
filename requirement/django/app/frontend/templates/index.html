@@ -1,23 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
-    <script src="./static/frontend/js/index.js"  type="module"></script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./static/frontend/style.css">
+  <script type="module" src="./static/frontend/js/firstPage.js"></script>
+  <title>Baby cadet</title>
 </head>
-<style>
-	body{
-	margin: 0px;
-	font-family: poppins, sans-serif;
-	/* background-color: red; */
-	/* background-color: #F8F9FA; */
-	}
-</style>
-<body >
-    {% csrf_token %}
-		<main-page></main-page>
+<body>
+  {% csrf_token %}
+  <first-page-component id="firstPage"></first-page-component>
 </body>
-
 </html>

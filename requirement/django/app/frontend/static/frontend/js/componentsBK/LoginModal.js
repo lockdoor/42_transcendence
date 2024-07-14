@@ -1,4 +1,4 @@
-import { navigateToForMainPage } from "../index.js";
+import { navigateToForMainPage } from "../indexBK.js";
 export class LoginModal extends HTMLElement {
 	constructor() {
 		super();

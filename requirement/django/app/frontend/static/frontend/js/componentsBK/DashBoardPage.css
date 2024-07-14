@@ -76,8 +76,8 @@ b {
 	color: #2D3748;
 }
 
-/* ========================================== navBar ========================================== */
-#navBar {
+/* ========================================== NAV-BAR ========================================== */
+#nav-bar {
 	height: 8vh;
 	min-height: 4rem;
 	background-color: #F8F9FA;
@@ -88,7 +88,7 @@ b {
 	position: relative;
 }
 
-#navBar::after {
+#nav-bar::after {
 	content: '';
 	position: absolute;
 	left: 0;
@@ -98,14 +98,14 @@ b {
 	background: linear-gradient(to right, #F8F9FA, #D8DBDD, #F8F9FA); 
 }
 
-#navBar #container {
+#nav-bar #container {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 0 1.2rem;
 }
 
-#navBar #menu {
+#nav-bar #menu {
 	border: 2px solid #2D3748;
 	border-radius: 0;
 	width: 30px;
@@ -116,42 +116,42 @@ b {
 	display: none;
 }
 
-#navBar #menu i {
+#nav-bar #menu i {
 	font-size: 1.4rem;
 	color: #2D3748;
 }
 
 
-#navBar #logo {
+#nav-bar #logo {
 	margin-left: 1.5rem;
 	display: flex;
 	gap: 0.5rem;
 	align-items: center;
 }
 
-#navBar #logo i {
+#nav-bar #logo i {
 	font-size: 2rem;
 	color: #2D3748;
 }
 
-#navBar #logo div {
+#nav-bar #logo div {
 	display: flex;
 	align-items: center;
 }
 
-#navBar #logo h2 {
+#nav-bar #logo h2 {
 	margin: 0; 
 	font-size: 1rem; 
 	color: #2D3748; 
 }
 
-#navBar #napProfile {
+#nav-bar #profile {
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 }
 
-#navBar #napProfile #profile-photo {
+#nav-bar #profile #profile-photo {
 	width: 2.8rem;
 	height: 2.8rem;
 	border-radius: 0.75rem;
@@ -159,7 +159,7 @@ b {
 	position: relative; 
 }
 
-#navBar #navProfile #profile-photo img {
+#nav-bar #profile #profile-photo img {
 	display: block; /* Remove default inline spacing */
 	width: 100%; 
 	height: 100%; 
@@ -174,7 +174,7 @@ b {
 	background-color: #F8F9FA;
 }
 
-#navProFile {
+#pro-file {
 	display: block;
 	margin-top: 0;
 	width: 15vw;
@@ -220,13 +220,13 @@ b {
 }
 
 @media screen and (max-width: 1200px) {
-	#navBar #menu {
+	#nav-bar #menu {
 		display: flex;
 	}
-	#navBar #logo {
+	#nav-bar #logo {
 		display: none;
 	}
-	#navProFile {
+	#pro-file {
 		display: none;
 		background-color: white;
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -243,13 +243,13 @@ b {
 }
 
 @media screen and (max-width: 740px) {
-	#navBar #menu {
+	#nav-bar #menu {
 		display: flex;
 	}
-	#navBar #logo {
+	#nav-bar #logo {
 		display: none;
 	}
-	#navProFile {
+	#pro-file {
 		display: none;
 		margin-top: 0;
 		width: 100%;

@@ -1,21 +1,20 @@
-import { navigateToForMainPage } from "../index.js";
-
 export class FirstPage extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
+	constructor() {
+		super();
+		this.attachShadow({ mode: "open" });
+		this.shadowRoot.innerHTML = this.template();
+	}
 
-  template = () => {
-    return `
+	template = () => {
+		return `
 			<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
 			<link rel="stylesheet" href="./static/frontend/js/components/firstPage.css">
 			
 			<div id="nav">
 				<div id="bg">
-					<button id="signIn-btn">SIGN IN</button>
-					<modal-dialog></modal-dialog>
-					<p id="text-join">to join the TOURNAMENT !</p>
+					<button id="signInBtn">SIGN IN</button>
+					<p id="textJoin">to join the TOURNAMENT ! Or </p>
+					<button id="signUpBtn">SIGN UP</button>
 				</div>
 			</div>
 			
@@ -31,63 +30,36 @@ export class FirstPage extends HTMLElement {
 					<span>42 Baby Cadet</span>
 				</p>
 			</div>
+
+			<modal-login-component id="modalLoginComponent" style="display: none;"></modal-login-component>
+			<modal-sign-up-component id="modalSignUpComponent" style="display: none;"></modal-sign-up-component>
 		`;
-  };
+	};
 
-  connectedCallback() {
-    this.shadowRoot.innerHTML = this.template();
-    this.shadowRoot
-      .getElementById("signIn-btn")
-      .addEventListener("click", () => {
-        // console.log(this.shadowRoot.getElementById())
-        // console.log(this.shadowRoot.getElementById("nav"))
-        this.shadowRoot
-          .getElementById("nav")
-          .querySelector("modal-dialog")
-          .shadowRoot.querySelector(".modal")
-          .setAttribute("open", "open");
-      });
-    // document
-    //   .querySelector("modal-dialog")
-    //   .shadowRoot.querySelector(".modal")
-    //   .setAttribute("open", "open");
-    // var loginBtn = this.shadowRoot.getElementById("signIn-btn");
-    // var loginText = this.shadowRoot.getElementById("signIn-text");
-    // var loginModal = this.shadowRoot.getElementById("loginModal");
-    // var registerText = this.shadowRoot.getElementById("signUp-text");
-    // var registerModal = this.shadowRoot.getElementById("registerModal");
-    // var closeLogin =
-    //   this.shadowRoot.childNodes[5].getElementsByClassName("closeIcon")[0];
-    // var closeRegister =
-    //   this.shadowRoot.childNodes[5].getElementsByClassName("closeIcon")[1];
+	toggleModal = (modalId) => {
+		const noneDisplayAllModal = () => {
+			this.shadowRoot.getElementById("modalLoginComponent").style.display = "none"
+			this.shadowRoot.getElementById("modalSignUpComponent").style.display = "none"
+		}
 
-    // loginBtn.onclick = function () {
-    //   loginModal.style.display = "flex";
-    // };
+		const modal = this.shadowRoot.getElementById(modalId)
 
-    // loginText.onclick = function () {
-    //   loginModal.style.display = "flex";
-    //   registerModal.style.display = "none";
-    // };
+		if (modal.style.display == "block") {
+			noneDisplayAllModal()
+		} else {
+			noneDisplayAllModal()
+			modal.style.display = "block"
+		}
+	}
 
-    // closeLogin.onclick = function () {
-    //   loginModal.style.display = "none";
-    // };
+	connectedCallback() {
 
-    // registerText.onclick = function () {
-    //   loginModal.style.display = "none";
-    //   registerModal.style.display = "flex";
-    // };
+		this.shadowRoot.getElementById("signInBtn").addEventListener("click", () => {
+			this.toggleModal("modalLoginComponent")
+		})
 
-    // closeRegister.onclick = function () {
-    //   registerModal.style.display = "none";
-    // };
-  }
+		this.shadowRoot.getElementById("signUpBtn").addEventListener("click", () => {
+			this.toggleModal("modalSignUpComponent")
+		})
+	}
 }
-
-// window.show_modal = () => {
-//   this.shadowRoot
-//     .querySelector("modal-dialog")
-//     .shadowRoot.querySelector(".modal")
-//     .setAttribute("open", "open");
-// };
