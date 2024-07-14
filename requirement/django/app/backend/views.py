@@ -97,6 +97,8 @@ def UserRegister(request):
         user = User.objects.create_user(username=username, password=password)
         if avatar:
             user.avatar = avatar
+        login(request, user)
+        user.is_online = True
         user.save()
         
         return JsonResponse({'message': 'Create user success'}, status=201)
@@ -157,8 +159,13 @@ def callback(request):
     else:
         user = User.objects.create_user(username=username, password=hash_password)
     login(request, user)
-    
-    return JsonResponse({'message': 'Login success'}, status=200)
+    user.is_online = True
+    user.save()
+
+    return JsonResponse({
+                            'message': 'Login success',
+                            'owner_id': user.id
+                            }, status=200)
 
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
