@@ -3,12 +3,11 @@ export class AccountManagment extends HTMLElement {
 		console.log("Account");
 		super();
 		this.attachShadow({ mode: "open" });
-		this.shadowRoot.innerHTML = this.template();
 	}
 
 	template = () => {
 		return `
-			<link rel="stylesheet" href="${window.location.origin}/static/frontend/js/components/AccountManagment.css">
+			<link rel="stylesheet" href="./static/frontend/js/components/AccountManagment.css">
 			
 			<div id="accountManagment">
 				<div id="header">
@@ -28,7 +27,7 @@ export class AccountManagment extends HTMLElement {
 	};
 
 	connectedCallback() {
-
+		this.shadowRoot.innerHTML = this.template();
 	}
 
 	disconnectedCallback() {

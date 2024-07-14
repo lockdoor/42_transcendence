@@ -1,42 +1,46 @@
-import { getCSRFToken } from "./utils.js"
+import { getCSRFToken, getUserId } from "./utils.js"
 
 export class DashBoardPage extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
-		this.userData = {}
+		this.shadowRoot.innerHTML = this.template()
 	}
 
-	/*fetchUser = async() => {
+	fetchUser = async() => {
 		try {
 			const csrfToken = getCSRFToken();
 			if (!csrfToken) {
 				throw new Error("CSRF token not found");
 			}
 
-			const owner_id = localStorage.get("owner_id")
+			const owner_id = getUserId()
+			if (!owner_id) {
+				throw new Error("owner_id not found");
+			}
 
-			const response = await fetch("api/users/:user_id/:owner_id/profile", {
+			const response = await fetch(`${window.location.origin}/api/users/${owner_id}/${owner_id}/profile`, {
 				method: 'GET',
 				credentials: "same-origin",
 				headers: {
 					"X-CSRFToken": csrfToken,
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify(data),
 			});
   
-		if (!response.ok) {
-			throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
-		}
+			const result = await response.json()
 
-		const json = await response.json()
-			// console.log(json)
-			localStorage.setItem("owner_id", json.owner_id);
+			if (!response.ok) {
+				throw new Error(`${response.status} ${response.statusText} ${result.error}`);
+			}
+			// console.log(result)
+
+			this.render(result)
+
 		} catch (error) {
-			console.error('Error fetching friends:', error);
+			console.error(`Error fetching owner: ${error}`);
 		}
-	}*/
+	}
 
 	template = () => {
 		return `
@@ -54,10 +58,12 @@ export class DashBoardPage extends HTMLElement {
 					</div>
 					<div id="profile">
 						<div id="profile-name">
-							<p><b>Prem</b></p>
+							Unknow
 						</div>
 						<div id="profile-photo">
-							<!--img src="../images/profile-1.jpg" alt="Profile Photo"-->
+							<img src="${window.location.origin+"/user-media/avatars/default.png"}" 
+								alt="Profile Photo" id="profileImg"
+								onerror="this.onerror=null; this.src='${window.location.origin+"/user-media/avatars/default.png"}';">
 						</div>
 					</div>
 				</div>
@@ -66,12 +72,15 @@ export class DashBoardPage extends HTMLElement {
 			<div id="div-content">
 				<profile-component id="proFile"></profile-component>
 				<div id="div-middle">
-					<tour-na-ment></tour-na-ment>
-					<notifi-cation></notifi-cation>
+					<tournament-component></tournament-component>
+					<div id="mainFrame">
+						<!--notification-component></notification-component-->
+					</div>
+
 				</div>
 				<div id="div-right">
-					<friends-block></friends-block>
-					<live-chat></live-chat>
+					<friends-component></friends-component>
+					<live-chat-component></live-chat-component>
 				</div>
 			</div>
 
@@ -86,6 +95,12 @@ export class DashBoardPage extends HTMLElement {
 		`;
 	}
 
+	render = (user) => {
+		const {username, avatar} = user
+		this.shadowRoot.getElementById("profile-name").innerText = username
+		this.shadowRoot.getElementById("profileImg").src = avatar
+	} 
+
 	toggleProfileVisibility = () => {
 		const profile = this.shadowRoot.getElementById('proFile');
 		if (profile) {
@@ -94,7 +109,7 @@ export class DashBoardPage extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.shadowRoot.innerHTML = this.template();
+		this.fetchUser()
 		const menuIcon = this.shadowRoot.getElementById('menu');
 		if (menuIcon) {
 			menuIcon.addEventListener('click', this.toggleProfileVisibility);

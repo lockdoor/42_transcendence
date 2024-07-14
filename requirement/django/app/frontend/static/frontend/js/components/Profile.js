@@ -5,8 +5,7 @@ export class Profile extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
-		// this.userData = {};
-		// this.fetchUser();
+		this.shadowRoot.innerHTML = this.template();
 	}
 
 	template = () => {
@@ -23,23 +22,23 @@ export class Profile extends HTMLElement {
 					<h4 id="username">Unknow</h4>
 				</a>
 				<div id="side-bar">
-					<a class="menu-item">
+					<div class="menu-item" data-url="account-management" data-title="Baby cadet">
 						<span><i class="uil uil-user"></i></span>
-						<h3 id="account">Account</h3>
-					</a>
-					<a class="menu-item">
+						<h3>Account</h3>
+					</div>
+					<div class="menu-item" data-url="notification" data-title="Baby cadet">
 						<span><i class="uil uil-bell"></i></span>
-						<h3 id="friendsRequest">Notifications</h3>
-					</a>
-					<a class="menu-item">
+						<h3>Notifications</h3>
+					</div>
+					<a class="menu-item" data-url="statistic" data-title="Baby cadet">
 						<span><i class="uil uil-chart-bar"></i></span>
-						<h3 id="statistic">Statistic</h3>
+						<h3>Statistic</h3>
 					</a>
-					<a class="menu-item" id="match-history-menu">
+					<a class="menu-item" id="match-history-menu" data-url="match-history" data-title="Baby cadet">
 						<span><i class="uil uil-file-alt"></i></span>
 						<h3>Match History</h3>
 					</a>
-					<a class="menu-item">
+					<a class="menu-item" data-url="blocked-list" data-title="Baby cadet">
 						<span><i class="uil uil-envelope-block"></i></span>
 						<h3 id="blockedList">Blocked List</h3>
 					</a>
@@ -129,77 +128,57 @@ export class Profile extends HTMLElement {
 	}
 
 	connectedCallback() {
-
-		// console.log("profile was connected")
-		this.shadowRoot.innerHTML = this.template();
 		this.fetchUser();
-
-		// this.shadowRoot
-		// 	.querySelector("#match-history-menu")
-		// 	.addEventListener("click", () => {
-		// 		const notificationElement = document
-		// 			.querySelector("main-page")
-		// 			.shadowRoot.childNodes[0].shadowRoot.querySelector(
-		// 				"notifi-cation"
-		// 			).shadowRoot;
-		// 		addElementInNoti(notificationElement, "match-history");
-		// 	});
-
-		// this.shadowRoot
-		// 	.querySelector("#account")
-		// 	.addEventListener("click", () => {
-		// 		const notificationElement = document
-		// 			.querySelector("main-page")
-		// 			.shadowRoot.childNodes[0].shadowRoot.querySelector(
-		// 				"notifi-cation"
-		// 			).shadowRoot;
-		// 		addElementInNoti(notificationElement, "account-managment");
-		// 	});
-
-		// this.shadowRoot
-		// 	.querySelector("#friendsRequest")
-		// 	.addEventListener("click", () => {
-		// 		const notificationElement = document
-		// 			.querySelector("main-page")
-		// 			.shadowRoot.childNodes[0].shadowRoot.querySelector(
-		// 				"notifi-cation"
-		// 			).shadowRoot;
-		// 		addElementInNoti(notificationElement, "friends-request");
-		// 	});
-
-		// this.shadowRoot
-		// 	.querySelector("#statistic")
-		// 	.addEventListener("click", () => {
-		// 		const notificationElement = document
-		// 			.querySelector("main-page")
-		// 			.shadowRoot.childNodes[0].shadowRoot.querySelector(
-		// 				"notifi-cation"
-		// 			).shadowRoot;
-		// 		addElementInNoti(notificationElement, "statis-tic");
-		// 	});
-
-		// this.shadowRoot
-		// 	.querySelector("#blockedList")
-		// 	.addEventListener("click", () => {
-		// 		const notificationElement = document
-		// 			.querySelector("main-page")
-		// 			.shadowRoot.childNodes[0].shadowRoot.querySelector(
-		// 				"notifi-cation"
-		// 			).shadowRoot;
-		// 		addElementInNoti(notificationElement, "block-list");
-		// 	});
-
+		
 		this.shadowRoot.querySelector("#logOut").addEventListener("click", this.logOut)
+
+		// JavaScript to handle navigation and content loading
+        document.addEventListener('DOMContentLoaded', () => {
+			// console.log('DOMContentLoaded')
+            const parent = this.parentNode.parentNode
+			const mainFrame = parent.getElementById("mainFrame")
+
+            // Function to load content dynamically
+            function loadContent(url) {
+                // Fetch content from server or set it directly
+                // For demo purposes, let's just set it directly
+                const content = {
+                    'account-management': "<account-management-component></account-management-component>",
+                    'notification': '<notification-component></notification-component>',
+					'statistic': "<statistic-component></statistic-component>",
+					'match-history': "<match-history-component></match-history-component>",
+					'blocked-list': "<blocked-list-component></blocked-list-component>"
+                };
+                mainFrame.innerHTML = content[url] || 'Content not found';
+            }
+
+            // Function to handle navigation
+            function navigate(event) {
+				console.log("navigate worked!")
+				console.log(event)
+                const url = event.getAttribute('data-url');
+                const title = event.getAttribute('data-title');
+
+                // Push state to history
+                // history.pushState({url: url}, title, `/${url}`);
+                history.pushState({url: url}, title);
+                // document.title = title; // Change the document title
+
+                // Load the content
+                loadContent(url);
+            }
+
+            // Attach click event listener to navigation items
+            this.shadowRoot.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => navigate(item));
+            });
+
+            // Handle back/forward button
+            window.addEventListener('popstate', (event) => {
+                if (event.state) {
+                    loadContent(event.state.url);
+                }
+            });
+        });
 	}
 }
-
-// function addElementInNoti(notiElement, nameElement) {
-// 	const addElement = document.createElement(nameElement);
-// 	if (notiElement.childNodes.length == 3) {
-// 		const nodeRemove = notiElement.childNodes[2];
-// 		notiElement.removeChild(nodeRemove);
-// 	}
-// 	if (!isTag(notiElement.lastChild, nameElement)) {
-// 		notiElement.appendChild(addElement);
-// 	}
-// }

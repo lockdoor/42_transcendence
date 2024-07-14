@@ -154,6 +154,7 @@ b {
 #navBar #napProfile #profile-photo {
 	width: 2.8rem;
 	height: 2.8rem;
+	/* height: 100%; */
 	border-radius: 0.75rem;
 	overflow: hidden; 
 	position: relative; 
