@@ -16,6 +16,7 @@ test:
 amt:
 	rm -f ./requirement/django/app/db.sqlite3
 	cp ./requirement/django/app/db.sqlite3.bk ./requirement/django/app/db.sqlite3
+	rm -f requirement/django/app/uploads/avatars/*.webp
 	docker compose -f docker-compose.yaml up -d
 	sleep 10
 	$(MAKE) -C selenium

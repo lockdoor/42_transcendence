@@ -1,3 +1,3 @@
-// require('./testTitle')
-// require('./testLogin')
+require('./testTitle')
 require('./testSignUp')
+require('./testLogin')

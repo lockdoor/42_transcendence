@@ -20,7 +20,7 @@ describe('Test Signup', function() {
 			const shadowRoot = await driver.executeScript('return arguments[0].shadowRoot', firstPage);
 			
 			const signUpBtn = await shadowRoot.findElement(By.id('signUpBtn'))
-			signUpBtn.click()
+			await signUpBtn.click()
 					
 			const modalSignUp = await shadowRoot.findElement(By.id('modalSignUpComponent'))
 			const signUpShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', modalSignUp);
