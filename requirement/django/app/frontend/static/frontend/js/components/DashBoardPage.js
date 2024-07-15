@@ -70,7 +70,7 @@ export class DashBoardPage extends HTMLElement {
 			</div>
 
 			<div id="div-content">
-				<profile-component id="proFile"></profile-component>
+				<profile-component id="profileComponent"></profile-component>
 				<div id="div-middle">
 					<tournament-component></tournament-component>
 					<div id="mainFrame">
@@ -102,7 +102,7 @@ export class DashBoardPage extends HTMLElement {
 	} 
 
 	toggleProfileVisibility = () => {
-		const profile = this.shadowRoot.getElementById('proFile');
+		const profile = this.shadowRoot.getElementById('profileComponent');
 		if (profile) {
 			profile.style.display = profile.style.display === 'none' ? 'block' : 'none';
 		}

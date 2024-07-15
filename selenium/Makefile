@@ -1,2 +1,3 @@
-all: 
+all:
+	npm install
 	npm test

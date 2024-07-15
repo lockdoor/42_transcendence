@@ -38,13 +38,13 @@ export class Profile extends HTMLElement {
 						<span><i class="uil uil-file-alt"></i></span>
 						<h3>Match History</h3>
 					</a>
-					<a class="menu-item" data-url="blocked-list" data-title="Baby cadet">
+					<a class="menu-item" id="blockedList" data-url="blocked-list" data-title="Baby cadet">
 						<span><i class="uil uil-envelope-block"></i></span>
-						<h3 id="blockedList">Blocked List</h3>
+						<h3>Blocked List</h3>
 					</a>
-					<a class="menu-item">
+					<a class="menu-item" id="logOut">
 						<span><i class="uil uil-signout"></i></span>
-						<h3 id="logOut">Log Out</h3>
+						<h3>Log Out</h3>
 					</a>
 				</div>
 				<div id="offline-pong">

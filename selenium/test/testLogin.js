@@ -14,7 +14,7 @@ describe('Test Login', function() {
 	it('should login', async () => {
 		await driver.get(configs.url);
 		const title = await driver.getTitle();
-		assert.equal("Baby cadet", title);
+		assert.equal("Baby cadet first page", title);
 		await driver.manage().setTimeouts({implicit: 500});
 	});
 

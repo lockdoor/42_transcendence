@@ -11,10 +11,10 @@ describe('Test Title', function() {
 		driver = await new Builder().forBrowser('chrome').build();
 	});
 
-	it('should open and title is Baby cadet', async () => {
+	it('should open and title is Baby cadet first page', async () => {
 		await driver.get(configs.url);
 		const title = await driver.getTitle();
-		assert.equal("Baby cadet", title);
+		assert.equal("Baby cadet first page", title);
 		await driver.manage().setTimeouts({implicit: 500});
 	});
 
