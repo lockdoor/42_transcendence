@@ -19,3 +19,4 @@ amt:
 	docker compose -f docker-compose.yaml up -d
 	sleep 10
 	$(MAKE) -C selenium
+	docker compose -f docker-compose.yaml down
