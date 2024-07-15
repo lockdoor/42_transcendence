@@ -1,13 +1,15 @@
+import { getUserAvatar } from "./utils.js";
 export class AccountManagment extends HTMLElement {
 	constructor() {
-		console.log("Account");
+		// console.log("Account");
 		super();
 		this.attachShadow({ mode: "open" });
+		this.shadowRoot.innerHTML = this.template();
 	}
 
 	template = () => {
 		return `
-			<link rel="stylesheet" href="./static/frontend/js/components/AccountManagment.css">
+			<link rel="stylesheet" href="${window.location.origin}/static/frontend/js/components/AccountManagment.css">
 			
 			<div id="accountManagment">
 				<div id="header">
@@ -18,7 +20,8 @@ export class AccountManagment extends HTMLElement {
 				</div>
 				<div id="content">
 					<div id="photo">
-						<img src="../images/profile-1.jpg" alt="Profile Photo">
+					<img id="avatar" src="${window.location.origin+getUserAvatar()}" alt="Profile Photo"
+					onerror="this.onerror=null; this.src='${window.location.origin+"/user-media/avatars/default.png"}';">
 					</div>
 					<button id="loginButton">Upload Image</button>
 				</div>
@@ -27,7 +30,7 @@ export class AccountManagment extends HTMLElement {
 	};
 
 	connectedCallback() {
-		this.shadowRoot.innerHTML = this.template();
+
 	}
 
 	disconnectedCallback() {

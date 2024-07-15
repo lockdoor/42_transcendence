@@ -1,2 +1,3 @@
-require('./testTitle')
-require('./testLogin')
+// require('./testTitle')
+// require('./testLogin')
+require('./testSignUp')

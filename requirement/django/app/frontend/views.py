@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.conf import settings
 
 # Create your views here.
 def index(request):
@@ -9,5 +10,9 @@ def index(request):
 def dashboard(request):
     if not request.user.is_authenticated:
         return redirect('frontend:index')
-    
-    return render(request, "dashboard.html", {"user": request.user})
+    context = {
+        "id": request.user.id,
+        "username": request.user.username,
+        "avatar": f'{settings.MEDIA_URL}{request.user.avatar}'
+    }
+    return render(request, "dashboard.html", {"user": context})
