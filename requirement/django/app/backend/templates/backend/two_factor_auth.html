@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Factor Authentication</h1>
+        <div id="qr-code">
+            <img src="{% url 'generate_totp_secret' %}" alt="QR Code">
+        </div>
+        <form id="otp-form" action="{% url 'verify_totp' %}" method="post">
+            {% csrf_token %}
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" required>
+            <input type="submit" value="Verify">
+        </form>
+    </div>
+    <script>
+        document.getElementById('otp-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var otp = document.getElementById('otp').value;
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            fetch("{% url 'verify_totp' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({otp: otp})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login success') {
+                    // Save tokens to sessionStorage
+                    sessionStorage.setItem('access_token', data.access);
+                    sessionStorage.setItem('refresh_token', data.refresh);
+                    console.log("Access Token:", sessionStorage.getItem('access_token'));
+                    console.log("Refresh Token:", sessionStorage.getItem('refresh_token'));
+                    window.location.href = "/api"; // Redirect to dashboard or any other page
+                } else {
+                    alert(data.error);
+                    window.location.href = "/api";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>

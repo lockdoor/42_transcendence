@@ -1,8 +1,9 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    path("", views.index),
+    path("", views.index, name="index"),
     path("user_register", views.user_register),
     path("auth/login", views.UserLogin, name="userLogin"),
     path("auth/login42", views.UserLogin42, name="userLogin42"),
@@ -21,4 +22,9 @@ urlpatterns = [
     path("users/<int:user_id>/blocked_list", views.GetUserBlockedList, name="getUserBlockedList"),
     path("users/<int:user_id>/unblock", views.UnblockUser, name="unblockUser"),
     path("get_csrf_token_and_session_id/", views.get_csrf_token_and_session_id, name="csrft_session"),
+    path('token/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'), #for dev
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #for dev
+    path('2fa', views.generate_totp_secret, name='generate_totp_secret'),
+    path('verify_totp/', views.verify_totp, name='verify_totp'),
+    path('2fa-page', views.two_factor_auth, name='two_factor_auth')
 ]
