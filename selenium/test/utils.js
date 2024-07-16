@@ -1,4 +1,5 @@
 const {until, By} = require ('selenium-webdriver')
+const configs = require ('./configs')
 
 async function login(driver, user) {
 	const firstPage = await driver.findElement(By.id('firstPage'))
@@ -67,9 +68,24 @@ async function profileNavigate(driver, target, title, mainFrame) {
 	await dashBoardShadowRoot.findElement(By.id(mainFrame))
 }
 
+async function friendRecommendNavigate(driver){
+	const dashBoard = await driver.findElement(By.id('dashBoardComponent'))
+	const dashBoardShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', dashBoard)
+	const friends = await dashBoardShadowRoot.findElement(By.id('friendsComponent'))
+	const friendsShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friends)
+	const friendRecommendBtn = await friendsShadowRoot.findElement(By.id('friendRecommendBtn'))
+	await friendRecommendBtn.click()
+	await driver.wait(until.titleIs("Baby cadet friend recommend"), 10000)
+	const el = await dashBoardShadowRoot.findElement(By.id("recommendFriendComponent"))
+	return el
+}
+
 module.exports = {
+	testUser: configs.users[0],
+	friendRequest: configs.users[1],
 	login,
 	logout,
 	signup,
-	profileNavigate
+	profileNavigate,
+	friendRecommendNavigate
 }

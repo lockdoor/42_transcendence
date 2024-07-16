@@ -1,28 +1,4 @@
-// const Mock_list = [
-//   {
-//     name: "Sarah",
-//     profileImg: "./static/frontend/images/profile-2.jpg",
-//     status: "Online",
-//   },
-//   {
-//     name: "Jenny",
-//     profileImg: "./static/frontend/images/profile-2.jpg",
-//     status: "Offline",
-//   },
-//   {
-//     name: "Lin",
-//     profileImg: "./static/frontend/images/profile-2.jpg",
-//     status: "Offline",
-//   },
-//   {
-//     name: "Kim",
-//     profileImg: "./static/frontend/images/profile-2.jpg",
-//     status: "Online",
-//   },
-// ];
-
-// import { changeNotification } from "./Utils.js";
-import { getCSRFToken, getUserId, addNavigate } from "./utils.js";
+import { getUserId, addNavigate, fetchJson } from "./utils.js";
 
 export class Friends extends HTMLElement {
   constructor() {
@@ -61,7 +37,7 @@ export class Friends extends HTMLElement {
 					<div id="profile">
 						<div id="profile-photo">
 							<img src="${friend.avatar}" alt="Profile Photo" 
-                onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
+								onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
 						</div>
 						<div id="profile-name">
 							<p><b>${friend.username}</b></p>
@@ -87,38 +63,10 @@ export class Friends extends HTMLElement {
 			</tr>
 		`).join('');
 	}
-  
-  fetchFriends = async () => {
-    try {
-      const csrfToken = getCSRFToken();
-			if (!csrfToken) {
-				throw new Error("CSRF token not found");
-			}
 
-			const owner_id = getUserId()
-			if (!csrfToken) {
-				throw new Error("owner_id not found");
-			}
-
-			const response = await fetch(`/api/users/${owner_id}/friends`, {
-				method: 'GET',
-				credentials: "same-origin",
-				headers: {
-					"X-CSRFToken": csrfToken,
-					"Content-Type": "application/json"
-				},
-			});
-
-			const result = await response.json()
-
-			if (!response.ok) {
-				throw new Error(`Fetch error: ${response.status} ${response.statusText} ${result.error}`);
-			}
-			this.render(result)
-
-		} catch (error) {
-			console.error('Error fetching friends:', error);
-		}
+	fetchFriends = async () => {
+		const result = await fetchJson("fetchFriends", "GET", `/api/users/${getUserId()}/friends`)
+		if (result) this.render(result)
   };
 
   render(result) {

@@ -1,4 +1,4 @@
-import { getCSRFToken } from "./utils.js";
+import { fetchJson, getCSRFToken } from "./utils.js";
 
 export class ModalLogin extends HTMLElement {
 
@@ -48,47 +48,15 @@ export class ModalLogin extends HTMLElement {
 
 	login = async(e)=>{
 		e.preventDefault()
-
-		try {
-			const data = {
-				username: this.shadowRoot.querySelector("#username").value,
-				password: this.shadowRoot.querySelector("#password").value
-			}
-
-		const csrfToken = getCSRFToken();
-		if (!csrfToken) {
-		throw new Error("CSRF token not found");
+		const data = {
+			username: this.shadowRoot.querySelector("#username").value,
+			password: this.shadowRoot.querySelector("#password").value
 		}
-
-		const response = await fetch("api/auth/login", {
-			method: 'POST',
-			credentials: "same-origin",
-			headers: {
-				"X-CSRFToken": csrfToken,
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(data),
-		});
-  
-		if (!response.ok) {
-			throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
-		}
-
-			// const json = await response.json()
-			// console.log(json)
-			// localStorage.setItem("owner_id", json.owner_id);
-			window.location.replace(window.location.origin + "/dashboard")
-		} catch (error) {
-			console.error('Error login:', error);
-		}
+		const result = await fetchJson("login", "POST", "api/auth/login", data)
+		if (result) window.location.replace(window.location.origin + "/dashboard")
 	}
 
 	connectedCallback(){
-		// debug
-		// this.shadowRoot.getElementById("username").value = "ton"
-		// this.shadowRoot.getElementById("password").value = "transcendence"
-
-
 		this.shadowRoot.getElementById("signInForm").addEventListener('submit', this.login)
 	}
 

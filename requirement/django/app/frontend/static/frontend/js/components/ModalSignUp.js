@@ -79,11 +79,6 @@ export class ModalSignUp extends HTMLElement {
 	}
 
 	connectedCallback(){
-
-		// debug
-		// this.shadowRoot.getElementById("usernameSignUp").value = "test1"
-		// this.shadowRoot.getElementById("passwordSignUp").value = "testtest1"
-
 		this.shadowRoot.getElementById("signUpForm")
 			.addEventListener("submit", this.signUp)
 	}

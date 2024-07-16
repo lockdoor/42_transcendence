@@ -14,8 +14,6 @@ export function getUserAvatar() {
 }
 
 export function addNavigate(element, target) {
-
-
 	// Function to load content dynamically
 	const loadContent = (url) => {
 		// Fetch content from server or set it directly
@@ -38,6 +36,7 @@ export function addNavigate(element, target) {
 
 		// Push state to history
 		// history.pushState({url: url}, title, `/${url}`);
+		// do not put url to address bar because when refresh it take 404
 		history.pushState({url: url}, title);
 		document.title = title; // Change the document title
 
@@ -45,7 +44,7 @@ export function addNavigate(element, target) {
 		loadContent(url);
 		
 		//debug
-		console.log(element)
+		// console.log(element)
 	}
 
 	// Attach click event listener to navigation items
@@ -59,3 +58,37 @@ export function addNavigate(element, target) {
 	});
 }
 
+export async function fetchJson(name, method, url, payload = null){
+	try {
+		const csrfToken = getCSRFToken();
+		if (!csrfToken) {
+			throw new Error("CSRF token not found");
+		}
+
+		const request = {
+			method: method,
+			credentials: "same-origin",
+			headers: {
+				"X-CSRFToken": csrfToken,
+			},
+		}
+
+		if (payload) {
+			request.headers["Content-Type"] = "application/json"
+			request.body = JSON.stringify(payload)
+		}
+
+		const response = await fetch(url, request);
+
+		const result = await response.json()
+
+		if (!response.ok) {
+			throw new Error(`${response.status} ${response.statusText} ${result.error}`);
+		}
+		
+		return result
+
+	} catch (error) {
+		console.error(`Error fetching ${name}:`, error);
+	}
+}
