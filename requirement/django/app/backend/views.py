@@ -46,7 +46,7 @@ def index(request):
     # }
     # return render(request, 'backend/login.html', {'token': context})
     return render(request, 'backend/login.html')
-    
+
 
 def two_factor_auth(request):
     return render(request, 'backend/two_factor_auth.html')
@@ -179,7 +179,17 @@ def verify_totp(request):
             return JsonResponse({'error': 'User is not logged in'}, status=401)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#1.1 /api/auth/login
+def jwt_and_auth_validate(request, owner_id):
+    if settings.ALLOW_API_WITHOUT_JWT == False:
+        err = jwt_manual_validate(request)
+        if err is not None:
+            return err
+    if settings.ALLOW_API_WITHOUT_AUTH == False:
+        if request.user.id != owner_id:
+            return JsonResponse({'error': 'Session mismatch'}, status=401)
+    return
+
+#1.1 POST /api/auth/login
 def UserLogin(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -213,7 +223,7 @@ def UserLogin(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-#1.2 /api/auth/register
+#1.2 POST /api/auth/register
 def UserRegister(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -237,7 +247,7 @@ def UserRegister(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#1.3 /api/auth/logout
+#1.3 POST /api/auth/logout
 def UserLogout(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -256,7 +266,7 @@ def UserLogout(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#1.4 /api/auth/login42
+#1.4 POST /api/auth/login42
 def UserLogin42(request):
     if request.method == 'POST':
         client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
@@ -320,17 +330,13 @@ def UserProfile(request, user_id, owner_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
                         owner = User.objects.get(id = owner_id)
-                        if settings.ALLOW_API_WITHOUT_AUTH == False:
-                            if request.user.id != owner.id:
-                                return JsonResponse({'error': 'Session mismatch'}, status=401)
                     except User.DoesNotExist:
                         return JsonResponse({'error': 'User not found'}, status=404)     
                     avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
@@ -346,16 +352,16 @@ def UserProfile(request, user_id, owner_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#2.1.2 /api/users/user_id/update_avatar
-def UpdateUserAvatar(request, user_id):
+#2.1.2 POST /api/users/update_avatar
+def UpdateUserAvatar(request):
     if request.method == 'POST':
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    user_id = request.POST.get('user_id')
+                    err = jwt_and_auth_validate(request, user_id)
+                    if err is not None:
+                        return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -377,18 +383,18 @@ def UpdateUserAvatar(request, user_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#2.1.5 POST /api/users/:user_id/block
-def BlockUser(request, user_id):
+#2.1.5 POST /api/users/block
+def BlockUser(request):
     if request.method == 'POST':
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
+            user_id = data.get('user_id')
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to block themselves'}, status=400)
                     User = get_user_model()
@@ -414,18 +420,18 @@ def BlockUser(request, user_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-#2.1.7 POST /api/users/:user_id/unblock
-def UnblockUser(request, user_id):
+#2.1.7 POST /api/users/unblock
+def UnblockUser(request):
     if request.method == 'POST':
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
+            user_id = data.get('user_id')
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to unblock themselves'}, status=400) 
                     User = get_user_model()
@@ -568,18 +574,18 @@ def GetNotifications(request, user_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-#2.3.2 POST: /api/users/:user_id/friends/accept
-def AcceptFriend(request, user_id):
+#2.3.2 POST: /api/users/friends/accept
+def AcceptFriend(request):
     if request.method == 'POST':
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
+            user_id = data.get('user_id')
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to accept friend to themselves'}, status=400) 
                     User = get_user_model()
@@ -609,19 +615,19 @@ def AcceptFriend(request, user_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#2.3.3 POST: /api/users/:user_id/notifications/friend_request 
-def SendFriendRequest(request, user_id):
+#2.3.3 POST: /api/users/notifications/friend_request 
+def SendFriendRequest(request):
     if request.method == 'POST':
         try:
             # if request.user.is_authenticated:
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
+            user_id = data.get('user_id')
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err
                     if (owner_id == user_id):
                         return JsonResponse({'error': 'Users try to send request to themselves'}, status=400) 
                     User = get_user_model()
@@ -647,21 +653,21 @@ def SendFriendRequest(request, user_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-#2.3.4 DELETE: /api/users/:user_id/notifications/delete
-def DeleteNotification(request, user_id):
+#2.3.4 DELETE: /api/users/notifications/delete
+def DeleteNotification(request):
     if request.method == 'DELETE':
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
+            user_id = data.get('user_id')
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
-                        if err is not None:
-                            return err
+                    err = jwt_and_auth_validate(request, owner_id)
+                    if err is not None:
+                        return err              
                     User = get_user_model()
                     try:    
-                        accpeter = User.objects.get(id=request.user.id)
+                        accpeter = User.objects.get(id=owner_id)
                         sender = User.objects.get(id=user_id)
                     except User.DoesNotExist:
                         return JsonResponse({'error': 'User not found'}, status=404)

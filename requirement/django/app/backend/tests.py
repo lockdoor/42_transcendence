@@ -262,9 +262,10 @@ class UpdateUserAvatarTest(TestCase):
         )
         #/api/users/:id/update_avatar
         response = self.client.post(
-            f'{self.url}{self.response_login.json()['owner_id']}/update_avatar',
+            f'{self.url}update_avatar',
             data={
                 'avatar': avatar,
+                'user_id': self.response_login.json()['owner_id'] 
             }
         )
         
@@ -278,8 +279,10 @@ class UpdateUserAvatarTest(TestCase):
             If upload empty file should return 404 Not found the avatar file
         """
         response = self.client.post(
-            f'{self.url}{self.response_login.json()['owner_id']}/update_avatar',
-            data={ },
+            f'{self.url}update_avatar',
+            data={ 
+                    'user_id': self.response_login.json()['owner_id'] 
+                },
         )
         
         self.assertEqual(response.status_code, 404)
@@ -304,8 +307,11 @@ class SendFriendRequest(TestCase):
             If success notification table should map correct sender and accepter to table.
         """ 
         for i in range(CLIENT_NUMB - 1):
-           response = self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                            json.dumps({'owner_id': self.user[i].id}),
+           response = self.client[i].post(f'{self.url}notifications/friend_request',
+                                            json.dumps({
+                                                'owner_id': self.user[i].id,
+                                                'user_id': self.user[CLIENT_NUMB - 1].id
+                                            }),
                                             content_type='application/json')
         
         self.assertEqual(response.status_code, 200)
@@ -316,8 +322,11 @@ class SendFriendRequest(TestCase):
             If User try to repeatly send friend request to the same user, should return 400
         """ 
         for i in range(2):
-           response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[1].id}/notifications/friend_request',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+           response = self.client[CLIENT_NUMB - 1].post(f'{self.url}notifications/friend_request',
+                                                        json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id': self.user[1].id
+                                                        }),
                                                         content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
@@ -327,8 +336,11 @@ class SendFriendRequest(TestCase):
         """
             If User try to send friend request to themselves, should return 400
         """
-        response = self.client[0].post(f'{self.url}{self.user[0].id}/notifications/friend_request',
-                                        json.dumps({'owner_id': self.user[0].id}),
+        response = self.client[0].post(f'{self.url}notifications/friend_request',
+                                        json.dumps({
+                                            'owner_id': self.user[0].id,
+                                            'user_id': self.user[0].id
+                                        }),
                                         content_type='application/json') 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users try to send request to themselves')
@@ -346,8 +358,11 @@ class GetNotificationTest(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json')  
 
     def test_get_notification_success(self):
@@ -388,8 +403,11 @@ class AcceptFriend(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
     
     def test_accept_friend_success(self):
@@ -403,8 +421,10 @@ class AcceptFriend(TestCase):
 
         for i in range(CLIENT_NUMB - 1):
             sender_id = notification[i]['user_id']
-            accept_response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{sender_id}/friends/accept',
-                                                                json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            accept_response = self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',json.dumps({
+                                                                    'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                                    'user_id': sender_id
+                                                                }),
                                                                 content_type='application/json')
         #After
         new_response = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications')
@@ -422,16 +442,20 @@ class AcceptFriend(TestCase):
     
     def test_repeatly_accept_friend(self):
         for i in range(2):
-            response=self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[0].id}/friends/accept',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            response=self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept', json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id': self.user[0].id
+                                                        }),
                                                         content_type='application/json')
         
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'User was already be friends')
     
     def test_user_accept_friend_for_themselves(self):
-        response=self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends/accept',
-                                                    json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        response=self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept', json.dumps({
+                                                        'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                        'user_id': self.user[CLIENT_NUMB - 1].id
+                                                    }),
                                                     content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users try to accept friend to themselves')
@@ -449,8 +473,11 @@ class GetAllFriend(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
     
     def test_get_all_friend_success(self):
@@ -458,8 +485,11 @@ class GetAllFriend(TestCase):
             If success should return list of friends include all users but the last user.
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/friends/accept',
-                                                json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',
+                                                json.dumps({
+                                                    'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                    'user_id': self.user[i].id
+                                                }),
                                                 content_type='application/json')
         response = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends')
 
@@ -498,16 +528,21 @@ class FindNewFriend(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
     def test_find_new_friend_success(self):
         """
             the last client accept for incoming 1st client friend request.
             if success should return JSON with user_profile CELIENT_NUMB items exclude 1st and last client.
         """
-        self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[0].id}/friends/accept',
-                                            json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',json.dumps({
+                                                'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                'user_id': self.user[0].id
+                                            }),
                                             content_type='application/json')
         expected_load = [
                 {
@@ -536,8 +571,11 @@ class DeleteNotification(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
     
     def test_delete_notification_success(self):
@@ -547,8 +585,11 @@ class DeleteNotification(TestCase):
         before  = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications')
         
         
-        response = self.client[CLIENT_NUMB - 1].delete(f'{self.url}{self.user[0].id}/notifications/delete',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        response = self.client[CLIENT_NUMB - 1].delete(f'{self.url}notifications/delete',
+                                                        json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id': self.user[0].id
+                                                        }),
                                                         content_type='application/json') 
         after = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications')
         
@@ -571,8 +612,11 @@ class BlockUser(TestCase):
             
     def test_block_user_success(self):
         for i in range(CLIENT_NUMB - 1):
-            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/block',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}block',
+                                                        json.dumps({
+                                                                'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                                 'user_id': self.user[i].id  
+                                                                }),
                                                         content_type='application/json')
         
         self.assertEqual(response.status_code, 200)
@@ -594,15 +638,22 @@ class BlockUser(TestCase):
     def test_block_some_friend_success(self): 
         #Get all friends should see everyone but friends who's blocker
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
-            self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/friends/accept',
-                                                json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',json.dumps({
+                                                    'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                    'user_id': self.user[i].id
+                                                }),
                                                 content_type='application/json')
             if i % 2 == 0:
-                self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+                self.client[i].post(f'{self.url}block',json.dumps({
+                                                            'owner_id': self.user[i].id,
+                                                            'user_id': self.user[CLIENT_NUMB - 1].id    
+                                                        }),
                                                         content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends'))
@@ -621,14 +672,23 @@ class BlockUser(TestCase):
     def test_block_all_friend_success(self): 
         #Get all blocker profile who's friends by blocked user should return 401
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
-            self.client[CLIENT_NUMB - 1].put(f'{self.url}{self.user[i].id}/friends/accept')
-
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+            self.client[CLIENT_NUMB - 1].put(f'{self.url}friends/accept',json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id': self.user[i].id
+                                                        }),
                                                         content_type='application/json')
+
+            self.client[i].post(f'{self.url}block',json.dumps({
+                                                                'owner_id': self.user[i].id,
+                                                                'user_id': self.user[CLIENT_NUMB - 1].id
+                                                            }),
+                                                            content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends'))
         # print(response.json())
@@ -637,12 +697,17 @@ class BlockUser(TestCase):
         
     def test_block_some_user_and_find_new_friend(self):
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
             if i % 2 == 0:
-                self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+                self.client[i].post(f'{self.url}block',json.dumps({
+                                                                    'owner_id': self.user[i].id,
+                                                                    'user_id': self.user[CLIENT_NUMB - 1].id    
+                                                                }),
                                                         content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends/find_new'))
@@ -663,11 +728,16 @@ class BlockUser(TestCase):
             If User was blocked by all users, User should can not find any user to send a request.
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}block',json.dumps({
+                                                        'owner_id': self.user[i].id,
+                                                        'user_id': self.user[CLIENT_NUMB - 1].id
+                                                        }),
                                                         content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends/find_new'))
@@ -679,12 +749,18 @@ class BlockUser(TestCase):
             If User was blocked by some users, User should can not see blocker's friend request
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
             if i % 2 == 0:
-                self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+                self.client[i].post(f'{self.url}block',
+                                                        json.dumps({
+                                                                'owner_id': self.user[i].id,
+                                                                'user_id': self.user[CLIENT_NUMB - 1].id   
+                                                            }),
                                                         content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications'))
@@ -706,11 +782,17 @@ class BlockUser(TestCase):
         If User was blocked by all users, User should cannot see any of request's send by blocker
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}block',
+                                                        json.dumps({
+                                                                'owner_id': self.user[i].id,
+                                                                'user_id': self.user[CLIENT_NUMB - 1].id
+                                                            }),
                                                         content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications'))
@@ -723,15 +805,22 @@ class BlockUser(TestCase):
             shouldn't can accpet the request.
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id 
+                                }),
                                 content_type='application/json') 
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}block',json.dumps({
+                                                            'owner_id': self.user[i].id,
+                                                            'user_id': self.user[CLIENT_NUMB - 1].id    
+                                                        }),
                                                         content_type='application/json')
         
-            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/friends/accept',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',json.dumps({
+                                                                'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                                'user_id': self.user[i].id
+                                                                }),
                                                         content_type='application/json')
             self.assertEqual(response.status_code, 401)
             self.assertEqual(response.json()['error'], 'User was blocked')
@@ -742,15 +831,23 @@ class BlockUser(TestCase):
             should return 401
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/notifications/friend_request',
-                                json.dumps({'owner_id': self.user[i].id}),
+            self.client[i].post(f'{self.url}notifications/friend_request',
+                                json.dumps({
+                                    'owner_id': self.user[i].id,
+                                    'user_id': self.user[CLIENT_NUMB - 1].id
+                                }),
                                 content_type='application/json') 
-            self.client[i].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[i].id}),
-                                                        content_type='application/json')
+            self.client[i].post(f'{self.url}block',json.dumps({
+                                                        'owner_id': self.user[i].id,
+                                                        'user_id': self.user[CLIENT_NUMB - 1].id   
+                                                    }),
+                                                    content_type='application/json')
         
-            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/notifications/friend_request',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            response = self.client[CLIENT_NUMB - 1].post(f'{self.url}notifications/friend_request',
+                                                        json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id': self.user[i].id
+                                                        }),
                                                         content_type='application/json') 
             self.assertEqual(response.status_code, 401)
             self.assertEqual(response.json()['error'], 'User was blocked')
@@ -760,8 +857,11 @@ class BlockUser(TestCase):
             If User try to repeatly block the same user, should return 400
         """
         for i in range(2):
-            response = self.client[0].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[0].id}),
+            response = self.client[0].post(f'{self.url}block',
+                                                        json.dumps({
+                                                            'owner_id': self.user[0].id,
+                                                            'user_id': self.user[CLIENT_NUMB - 1].id
+                                                        }),
                                                         content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users is blocker now')
@@ -770,8 +870,10 @@ class BlockUser(TestCase):
         """
             If Users try to block themselve, should return 400
         """
-        response = self.client[0].post(f'{self.url}{self.user[0].id}/block',
-                                                        json.dumps({'owner_id': self.user[0].id}),
+        response = self.client[0].post(f'{self.url}block',json.dumps({
+                                                        'owner_id': self.user[0].id,
+                                                        'user_id': self.user[0].id
+                                                        }),
                                                         content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users try to block themselves')
@@ -780,11 +882,15 @@ class BlockUser(TestCase):
         """
             If Users is blocked and try to block the blocker, should reuturn 400
         """
-        self.client[0].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/block',
-                                                        json.dumps({'owner_id': self.user[0].id}),
+        self.client[0].post(f'{self.url}block',json.dumps({
+                                                        'owner_id': self.user[0].id,
+                                                        'user_id': self.user[CLIENT_NUMB - 1].id
+                                                        }),
                                                         content_type='application/json')
-        response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[0].id}/block',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        response = self.client[CLIENT_NUMB - 1].post(f'{self.url}block',json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id':self.user[0].id    
+                                                        }),
                                                         content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users is blocked now')
@@ -804,8 +910,11 @@ class GetBlockedList(TestCase):
         
     def test_get_blocked_list_success(self):
         for i in range(CLIENT_NUMB - 1):
-            self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/block',
-                                                json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            self.client[CLIENT_NUMB - 1].post(f'{self.url}block',
+                                                json.dumps({
+                                                    'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                    'user_id': self.user[i].id
+                                                    }),
                                                 content_type='application/json')
         
         response = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/blocked_list')
@@ -845,15 +954,19 @@ class UnBlockUser(TestCase):
             If user unblock success shoud return 200 and delete the blocked record.
         """
         for i in range(CLIENT_NUMB - 1):
-            self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[i].id}/block',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+            self.client[CLIENT_NUMB - 1].post(f'{self.url}block',json.dumps({
+                                                            'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                            'user_id':self.user[i].id
+                                                            }),
                                                         content_type='application/json')
         #Before Unblock Uer should fail to get blocker UserProfile.
         response = response = self.client[0].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/{self.user[0].id}/profile')
         self.assertEqual(response.json()['error'], 'User was blocked')
         
-        response = self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[0].id}/unblock',
-                                                        json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        response = self.client[CLIENT_NUMB - 1].post(f'{self.url}unblock',json.dumps({
+                                                        'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                        'user_id': self.user[0].id,
+                                                        }),
                                                         content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Unblock success')
@@ -888,8 +1001,11 @@ class UnBlockUser(TestCase):
         """
         If Users try to unblock themselves should return 400
         """     
-        response = self.client[0].post(f'{self.url}{self.user[0].id}/unblock',
-                                        json.dumps({'owner_id': self.user[0].id}),
+        response = self.client[0].post(f'{self.url}unblock',
+                                        json.dumps({
+                                            'owner_id': self.user[0].id,
+                                            'user_id': self.user[0].id
+                                        }),
                                         content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Users try to unblock themselves')
@@ -898,11 +1014,16 @@ class UnBlockUser(TestCase):
         """
         If Blocked users try to unblock Blocker user should return 400
         """
-        self.client[CLIENT_NUMB - 1].post(f'{self.url}{self.user[0].id}/block',
-                                            json.dumps({'owner_id': self.user[CLIENT_NUMB - 1].id}),
+        self.client[CLIENT_NUMB - 1].post(f'{self.url}block',json.dumps({
+                                                'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                                'user_id':self.user[0].id    
+                                            }),
                                             content_type='application/json')
-        response = self.client[0].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/unblock',
-                                        json.dumps({'owner_id': self.user[0].id}),
+        response = self.client[0].post(f'{self.url}unblock',
+                                        json.dumps({
+                                            'owner_id': self.user[0].id,
+                                            'user_id': self.user[CLIENT_NUMB - 1].id,
+                                        }),
                                         content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Blocked users cannot unblock blocker')
@@ -911,8 +1032,11 @@ class UnBlockUser(TestCase):
         """
         If User try to unblock who's not blocked should return 404
         """
-        response = self.client[0].post(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/unblock',
-                                        json.dumps({'owner_id': self.user[0].id}),
+        response = self.client[0].post(f'{self.url}unblock',
+                                        json.dumps({
+                                            'owner_id': self.user[0].id,
+                                            'user_id': self.user[CLIENT_NUMB - 1].id    
+                                        }),
                                         content_type='application/json')
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'BlockedList not found')
