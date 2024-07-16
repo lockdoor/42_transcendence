@@ -78,6 +78,7 @@ def UserLogin(request):
                             'message': 'Login success',
                             'owner_id': user.id
                             }, status=200)
+        # return redirect('frontend:dashboard')
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
@@ -166,7 +167,7 @@ def callback(request):
                             'message': 'Login success',
                             'owner_id': user.id
                             }, status=200)
-
+    # return redirect('frontend:dashboard')
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):
@@ -178,6 +179,9 @@ def UserProfile(request, user_id, owner_id):
                     try:
                         user = User.objects.get(id = user_id)
                         owner = User.objects.get(id = owner_id)
+                        if settings.ALLOW_API_WITHOUT_AUTH == False:
+                            if request.user.id != owner.id:
+                                return JsonResponse({'error': 'Session mismatch'}, status=401)
                     except User.DoesNotExist:
                         return JsonResponse({'error': 'User not found'}, status=404)     
                     avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
