@@ -22,7 +22,7 @@
 // ];
 
 // import { changeNotification } from "./Utils.js";
-import { getCSRFToken, getUserId } from "./utils.js";
+import { getCSRFToken, getUserId, addNavigate } from "./utils.js";
 
 export class Friends extends HTMLElement {
   constructor() {
@@ -40,43 +40,41 @@ export class Friends extends HTMLElement {
 			<div id="Friends">
 				<div id="header">
 					<h4>Friends</h4>
-					<button id="findFriendsButton">
+					<button id="friendRecommendBtn" data-url="recommend-friend" data-title="Baby cadet friend recommend">
 						<i class="uil uil-user-plus"></i> Find Friends
 					</button>
 				</div>
 				<table>
-					<tbody>
-						${this.friends.length > 0 
-              ? this.generateRows()
-              : "<div>No friend</div>"}
+					<tbody id="friendsTableBody">
+						<div>No friend</div>
 					</tbody>
 				</table>
 			</div>
 		`;
 	};
 
-  generateRows() {
-    return this.friends.map(
-      (list) => `
+  generateRows(friends) {
+    return friends.map(
+      (friend) => `
 			<tr>
 				<td>
 					<div id="profile">
 						<div id="profile-photo">
-							<img src="${list.avatar}" alt="Profile Photo" 
+							<img src="${friend.avatar}" alt="Profile Photo" 
                 onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
 						</div>
 						<div id="profile-name">
-							<p><b>${list.username}</b></p>
+							<p><b>${friend.username}</b></p>
 						</div>
 					</div>
 				</td>
 				<td>
 					<p class="${
-            list.is_online == true
+            friend.is_online == true
               ? "status-online"
               : "status-offline"
           }">
-						${list.is_online == true ? 'Online' : 'Offline'}
+						${ friend.is_online == true ? 'Online' : 'Offline'}
 					</p>
 				</td>
 				<td>
@@ -116,37 +114,29 @@ export class Friends extends HTMLElement {
 			if (!response.ok) {
 				throw new Error(`Fetch error: ${response.status} ${response.statusText} ${result.error}`);
 			}
-			this.friends = result
-			this.render()
+			this.render(result)
 
 		} catch (error) {
 			console.error('Error fetching friends:', error);
 		}
   };
 
-  render() {
-		this.shadowRoot.innerHTML = ""
-		this.shadowRoot.innerHTML = this.template();
+  render(result) {
+		this.shadowRoot.getElementById('friendTableBody').innerHTML = this.generateRows(result)
   }
 
   connectedCallback() {
 		this.fetchFriends()
 
-		// this.shadowRoot.querySelector('#findFriendsButton').addEventListener('click', () => {
-		// 	changeNotification("recommends-friends");
-		// });
+		// JavaScript to handle navigation and content loading
+		document.addEventListener('DOMContentLoaded', () => {
+			// console.log('DOMContentLoaded')
+			const parent = this.parentNode.parentNode.parentNode
+			const mainFrame = parent.getElementById("mainFrame")
 
-		// this.shadowRoot.querySelectorAll('.uil-user').forEach(icon => {
-		// 	icon.addEventListener('click', () => {
-		// 		changeNotification("friend-profile");
-		// 	});
-		// });
-
-		// this.shadowRoot.querySelectorAll('.uil-upload').forEach(icon => {
-		// 	icon.addEventListener('click', () => {
-		// 		changeNotification("invite-friend");
-		// 	});
-		// });
+			// Attach click event listener to navigation items
+			const friendRecommendBtn = this.shadowRoot.querySelector('#friendRecommendBtn')
+			addNavigate(friendRecommendBtn, mainFrame)
+		})
 	}
-
 }

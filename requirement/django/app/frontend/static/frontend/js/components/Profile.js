@@ -1,5 +1,5 @@
 // import { isTag } from "./Utils.js";
-import { getCSRFToken, getUserId } from "./utils.js";
+import { addNavigate, getCSRFToken, getUserId } from "./utils.js";
 
 export class Profile extends HTMLElement {
 	constructor() {
@@ -22,23 +22,23 @@ export class Profile extends HTMLElement {
 					<h4 id="username">Unknow</h4>
 				</a>
 				<div id="side-bar">
-					<div class="menu-item" data-url="account-management" data-title="Baby cadet">
+					<div class="menu-item link-target" id="accountManagementLink" data-url="account-management" data-title="Baby cadet acount management">
 						<span><i class="uil uil-user"></i></span>
 						<h3>Account</h3>
 					</div>
-					<div class="menu-item" data-url="notification" data-title="Baby cadet">
+					<div class="menu-item link-target" id="notificationLink" data-url="notification" data-title="Baby cadet notification">
 						<span><i class="uil uil-bell"></i></span>
 						<h3>Notifications</h3>
 					</div>
-					<a class="menu-item" data-url="statistic" data-title="Baby cadet">
+					<a class="menu-item link-target" id="statisticLink" data-url="statistic" data-title="Baby cadet statistic">
 						<span><i class="uil uil-chart-bar"></i></span>
 						<h3>Statistic</h3>
 					</a>
-					<a class="menu-item" id="match-history-menu" data-url="match-history" data-title="Baby cadet">
+					<a class="menu-item link-target" id="matchHistoryLink" data-url="match-history" data-title="Baby cadet match history">
 						<span><i class="uil uil-file-alt"></i></span>
 						<h3>Match History</h3>
 					</a>
-					<a class="menu-item" id="blockedList" data-url="blocked-list" data-title="Baby cadet">
+					<a class="menu-item link-target" id="blockedListLink" data-url="blocked-list" data-title="Baby cadet blocked list">
 						<span><i class="uil uil-envelope-block"></i></span>
 						<h3>Blocked List</h3>
 					</a>
@@ -133,52 +133,13 @@ export class Profile extends HTMLElement {
 		this.shadowRoot.querySelector("#logOut").addEventListener("click", this.logOut)
 
 		// JavaScript to handle navigation and content loading
-        document.addEventListener('DOMContentLoaded', () => {
+		document.addEventListener('DOMContentLoaded', () => {
 			// console.log('DOMContentLoaded')
-            const parent = this.parentNode.parentNode
+			const parent = this.parentNode.parentNode
 			const mainFrame = parent.getElementById("mainFrame")
 
-            // Function to load content dynamically
-            function loadContent(url) {
-                // Fetch content from server or set it directly
-                // For demo purposes, let's just set it directly
-                const content = {
-                    'account-management': "<account-management-component></account-management-component>",
-                    'notification': '<notification-component></notification-component>',
-					'statistic': "<statistic-component></statistic-component>",
-					'match-history': "<match-history-component></match-history-component>",
-					'blocked-list': "<blocked-list-component></blocked-list-component>"
-                };
-                mainFrame.innerHTML = content[url] || 'Content not found';
-            }
-
-            // Function to handle navigation
-            function navigate(event) {
-				console.log("navigate worked!")
-				console.log(event)
-                const url = event.getAttribute('data-url');
-                const title = event.getAttribute('data-title');
-
-                // Push state to history
-                // history.pushState({url: url}, title, `/${url}`);
-                history.pushState({url: url}, title);
-                // document.title = title; // Change the document title
-
-                // Load the content
-                loadContent(url);
-            }
-
-            // Attach click event listener to navigation items
-            this.shadowRoot.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', () => navigate(item));
-            });
-
-            // Handle back/forward button
-            window.addEventListener('popstate', (event) => {
-                if (event.state) {
-                    loadContent(event.state.url);
-                }
-            });
+			// Attach click event listener to navigation items
+			this.shadowRoot.querySelectorAll('.link-target').forEach(item => addNavigate(item, mainFrame));
         });
 	}
 }

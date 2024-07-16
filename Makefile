@@ -18,6 +18,13 @@ amt:
 	cp ./requirement/django/app/db.sqlite3.bk ./requirement/django/app/db.sqlite3
 	rm -f requirement/django/app/uploads/avatars/*.webp
 	docker compose -f docker-compose.yaml up -d
-	sleep 10
+	sleep 2
 	$(MAKE) -C selenium
+	docker compose -f docker-compose.yaml down
+
+# automate test with selenuim 1 test
+amt1:
+	docker compose -f docker-compose.yaml up -d
+	sleep 2
+	$(MAKE) -C selenium one
 	docker compose -f docker-compose.yaml down
