@@ -75,7 +75,10 @@
                     messageDiv.innerHTML = `<p>${data.error}</p>`;
                 }
                 if (data.message === 'Login success') {
-                    location.reload(); // Reload the page after logout
+                    location.reload(); // Reload the page after login
+                }
+                if (data.message === 'Redirect 2fa') {
+                    window.location.href = "/api/2fa-page/";
                 }
             })
             .catch(error => {
@@ -85,14 +88,21 @@
 
         document.getElementById('logoutForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the form from submitting the traditional way
-
+        
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
+            const accessToken = sessionStorage.getItem('access_token');
+        
+            if (!accessToken) {
+                alert('No access token found. Please log in again.');
+                return;
+            }
+        
             fetch('{% url "userLogout" %}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
+                    'X-CSRFToken': csrfToken,
+                    'Authorization': `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({})
             })
@@ -106,6 +116,9 @@
                     messageDiv.innerHTML = `<p>${data.error}</p>`;
                 }
                 if (data.message === 'Logout success') {
+                    // Clear tokens from sessionStorage
+                    sessionStorage.removeItem('access_token');
+                    sessionStorage.removeItem('refresh_token');
                     location.reload(); // Reload the page after logout
                 }
             })

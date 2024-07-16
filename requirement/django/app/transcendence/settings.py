@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Load .env file
 env_file_path = '.env'  # Adjust the path if needed
@@ -39,14 +40,38 @@ SECRET_KEY = 'django-insecure-y#kbgupk0%s9!y$@=qz-382qm%ndes!e#h&^bkw9yt0&k2#mu=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
+SESSION_COOKIE_AGE = 7200  #seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+# For JWT Token
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
 
 # Application definition
 
 INSTALLED_APPS = [
     'frontend',
     'backend',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -145,14 +170,4 @@ MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/user-media/'
 
 ALLOW_API_WITHOUT_AUTH = False
-
-# ##For 42 OAuth
-# ENV_FILE = find_dotenv()
-# if ENV_FILE:
-#     load_dotenv(ENV_FILE)
-
-# CLIENT_ID = os.environ.get("CLIENT_ID")
-# CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
-# AUTHORIZATION_URL = os.environ.get("AUTHORIZATION_URL")
-# TOKEN_URL = os.environ.get("TOKEN_URL")
-# REDIRECT_URI = os.environ.get("REDIRECT_URI")
+ALLOW_API_WITHOUT_JWT = False

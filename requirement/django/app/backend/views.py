@@ -6,21 +6,55 @@ from .models import Notification, BlockedList
 from django.shortcuts import render, redirect
 from django.middleware.csrf import get_token
 from django.contrib.sessions.models import Session
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from authlib.integrations.requests_client import OAuth2Session
 from django.contrib.auth.hashers import make_password
 
-DEFAULT_AVATAR = f'avatars/default.png'
+import io
+import jwt
+import json
+import pyotp
+import qrcode
+from jwt.exceptions import ExpiredSignatureError
+from django.test import Client
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['user_id'] = user.id
+        token['username'] = user.username
+        token['score'] = user.score
+        token['is_online'] = user.is_online
+        token['avatar'] = user.avatar.url if user.avatar else None
+
+        return token
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer  
+
+def index(request):   
+    # context = {
+    #     'access': request.session['access_token'],
+    #     'refresh': request.session['refresh_token']
+    # }
+    # return render(request, 'backend/login.html', {'token': context})
+    return render(request, 'backend/login.html')
+    
+
+def two_factor_auth(request):
+    return render(request, 'backend/two_factor_auth.html')
 
 def get_csrf_token_and_session_id(request):
     csrf_token = get_token(request)
     session_id = request.session.session_key
     return JsonResponse({'csrf_token': csrf_token, 'sessionid': session_id}, status=200)
-
-def index(request):
-    return render(request, 'backend/login.html')
 
 def user_register(request):
     return render(request, 'backend/register.html')
@@ -58,6 +92,93 @@ def getUserNotification(User, noti, request):
         'is_online': user.is_online
     })
 
+def get_jwt_token(username, password):
+    client = Client()
+    response = client.post('/api/token/', 
+                           json.dumps({
+                                        'username': username, 
+                                        'password': password
+                            }), 
+                            content_type='application/json')
+    token = response.json()
+    return token
+
+def get_token_for_authenticated_user(request):
+    if request.user.is_authenticated:
+        refresh = RefreshToken.for_user(request.user)
+        return ({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
+def jwt_manual_validate(request):
+    try:
+        auth = JWTAuthentication()
+        header = auth.get_header(request)
+        if header is None:
+            return JsonResponse({'error': 'JWT token is missing'}, status=401)
+        raw_token = auth.get_raw_token(header)
+        jwt.decode(raw_token, settings.SECRET_KEY, algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
+    except ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except Exception:
+        return JsonResponse({'error': 'Authentication failed'}, status=401)
+    return
+
+def generate_totp_secret(request):
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            user = request.user
+            if user.totp_secret is None:
+                #User login to website first time
+                totp_secret = pyotp.random_base32()
+                user.totp_secret = totp_secret
+                user.save()
+            else:
+                totp_secret = user.totp_secret
+            totp_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
+                user.username, issuer_name="Transcendence"
+            )
+
+            qr = qrcode.make(totp_uri)
+            stream = io.BytesIO() #creates an in-memory binary stream to store the QR code image
+            qr.save(stream, 'PNG') #saves the QR code image into the stream in PNG format.
+            stream.seek(0) #moves the stream pointer to the beginning, preparing it for reading.
+            return HttpResponse(stream.getvalue(), content_type='image/png')
+        else:
+            return JsonResponse({'error': 'User is not logged in'}, status=401)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def verify_totp(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            try:
+                data = json.loads(request.body)
+                otp = data.get('otp')
+            except json.JSONDecodeError :
+                return JsonResponse({'error':"Invalid OTP. Please try again."}, status=401)
+            user = request.user
+            totp = pyotp.TOTP(user.totp_secret)
+            if totp.verify(otp):
+                access_token = request.session['access_token']
+                refresh_token = request.session['refresh_token']
+                user.is_online = True
+                user.save()
+                return JsonResponse({
+                                'message': 'Login success',
+                                'owner_id': user.id,
+                                'refresh': refresh_token,
+                                'access': access_token,
+                                }, status=200)
+                # return redirect ('backend:index')
+            else:
+                logout(request)
+                return JsonResponse({'error':"Invalid OTP. Please try again."}, status=401)
+        else:
+            return JsonResponse({'error': 'User is not logged in'}, status=401)
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 #1.1 /api/auth/login
 def UserLogin(request):
     if request.method == 'POST':
@@ -69,15 +190,26 @@ def UserLogin(request):
             return JsonResponse({'error': 'User is already logged in'}, status=400)
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            user.is_online = True
-            user.save()
-        else:
-            return JsonResponse({'error': 'Invalid username or password'}, status=401)    
-        return JsonResponse({
+            if settings.ALLOW_API_WITHOUT_JWT == False:
+                jwt_token = get_jwt_token(username, password)
+                request.session['access_token'] = jwt_token.get('access')
+                request.session['refresh_token'] = jwt_token.get('refresh')
+                login(request, user)
+                user.save()
+                return JsonResponse({
+                            'message': 'Redirect 2fa',
+                            }, status=200)
+            else:
+                login(request, user)
+                user.is_online = True
+                user.save()
+                return JsonResponse({
                             'message': 'Login success',
                             'owner_id': user.id
                             }, status=200)
+        else:
+            return JsonResponse({'error': 'Invalid username or password'}, status=401)    
+        # return redirect('frontend:dashboard')
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
@@ -109,6 +241,10 @@ def UserRegister(request):
 def UserLogout(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
+            if settings.ALLOW_API_WITHOUT_JWT == False:
+                err = jwt_manual_validate(request)
+                if err is not None:
+                    return err
             User = get_user_model()
             user = User.objects.get(id=request.user.id)
             user.is_online = False
@@ -158,15 +294,25 @@ def callback(request):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
     else:
         user = User.objects.create_user(username=username, password=hash_password)
-    login(request, user)
-    user.is_online = True
-    user.save()
-
-    return JsonResponse({
-                            'message': 'Login success',
-                            'owner_id': user.id
-                            }, status=200)
-
+    if settings.ALLOW_API_WITHOUT_JWT == False:
+        login(request, user)
+        jwt_token = get_token_for_authenticated_user(request)
+        request.session['access_token'] = jwt_token['access']
+        request.session['refresh_token'] = jwt_token['refresh']
+        user.save()
+        # return JsonResponse({
+        #             'message': 'Redirect 2fa',
+        #             }, status=200)
+        return redirect (two_factor_auth)
+    else:
+        login(request, user)
+        user.is_online = True
+        user.save()
+        return JsonResponse({
+                    'message': 'Login success',
+                    'owner_id': user.id
+                    }, status=200)
+    # return redirect('frontend:dashboard')
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):
@@ -174,10 +320,17 @@ def UserProfile(request, user_id, owner_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
                         owner = User.objects.get(id = owner_id)
+                        if settings.ALLOW_API_WITHOUT_AUTH == False:
+                            if request.user.id != owner.id:
+                                return JsonResponse({'error': 'Session mismatch'}, status=401)
                     except User.DoesNotExist:
                         return JsonResponse({'error': 'User not found'}, status=404)     
                     avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
@@ -199,6 +352,10 @@ def UpdateUserAvatar(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -228,6 +385,10 @@ def BlockUser(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to block themselves'}, status=400)
                     User = get_user_model()
@@ -261,6 +422,10 @@ def UnblockUser(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to unblock themselves'}, status=400) 
                     User = get_user_model()
@@ -291,6 +456,10 @@ def GetUserBlockedList(request, user_id):
         #    if request.user.is_authenticated:
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                 User = get_user_model()
                 try:
                     user = User.objects.get(id=user_id)
@@ -315,6 +484,10 @@ def GetAllFriends(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id=user_id)
@@ -340,6 +513,10 @@ def FindNewFriends(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id=user_id)
@@ -365,6 +542,10 @@ def GetNotifications(request, user_id):
         # if request.user.is_authenticated:
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                 User = get_user_model()
                 try:
                     user = User.objects.get(id=user_id)
@@ -395,6 +576,10 @@ def AcceptFriend(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to accept friend to themselves'}, status=400) 
                     User = get_user_model()
@@ -433,6 +618,10 @@ def SendFriendRequest(request, user_id):
             owner_id = data.get('owner_id')
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (owner_id == user_id):
                         return JsonResponse({'error': 'Users try to send request to themselves'}, status=400) 
                     User = get_user_model()
@@ -466,6 +655,10 @@ def DeleteNotification(request, user_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:    
                         accpeter = User.objects.get(id=request.user.id)
