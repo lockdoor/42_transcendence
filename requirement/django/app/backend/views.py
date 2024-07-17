@@ -531,9 +531,11 @@ def FindNewFriends(request, user_id):
                     not_friend_set =  User.objects.exclude(id=user_id).exclude(friend=user)
                     not_friends = []
                     for not_friend in not_friend_set:
-                        profile = getUserProfile(User=User, user=not_friend, owner=user)
-                        if profile is not None:
-                            not_friends.append(profile)
+                        if (not Notification.objects.filter(sender=user, accepter=not_friend).exists() and
+                    not Notification.objects.filter(sender=not_friend, accepter=user).exists()):
+                            profile = getUserProfile(User=User, user=not_friend, owner=user)
+                            if profile is not None:
+                                not_friends.append(profile)
                     if len(not_friends) == 0:
                         return JsonResponse({'error': 'User was blocked by all users'}, status=401)
                     return JsonResponse(not_friends, status=200 , safe=False)

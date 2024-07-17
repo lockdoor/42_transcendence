@@ -528,22 +528,18 @@ class FindNewFriend(TestCase):
             json.dumps(self.payload[i]),
             content_type='application/json')
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}notifications/friend_request',
-                                json.dumps({
-                                    'owner_id': self.user[i].id,
-                                    'user_id': self.user[CLIENT_NUMB - 1].id
-                                }),
-                                content_type='application/json') 
+            if i % 2 == 0:
+                self.client[CLIENT_NUMB - 1].post(f'{self.url}notifications/friend_request',
+                                    json.dumps({
+                                        'owner_id': self.user[CLIENT_NUMB - 1].id,
+                                        'user_id': self.user[i].id
+                                    }),
+                                    content_type='application/json') 
     def test_find_new_friend_success(self):
         """
-            the last client accept for incoming 1st client friend request.
-            if success should return JSON with user_profile CELIENT_NUMB items exclude 1st and last client.
+            if client send friend request the othe users
+            findnewfriend should list all users exclude user in notification list
         """
-        self.client[CLIENT_NUMB - 1].post(f'{self.url}friends/accept',json.dumps({
-                                                'owner_id': self.user[CLIENT_NUMB - 1].id,
-                                                'user_id': self.user[0].id
-                                            }),
-                                            content_type='application/json')
         expected_load = [
                 {
                     'id': self.user[i].id,
@@ -551,7 +547,29 @@ class FindNewFriend(TestCase):
                     'avatar': self.user[i].avatar.url,
                     'is_online': True
                 }
-                for i in range(CLIENT_NUMB - 1) if i != 0
+                for i in range(CLIENT_NUMB - 1) if i % 2 != 0
+            ]
+        response = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends/find_new')
+        # print(response.json())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_load)
+    
+    def test_accept_friend_and_find_new_friend(self):
+        for i in range(CLIENT_NUMB - 1):
+            if i % 2 == 0:
+                accept_response = self.client[i].post(f'{self.url}friends/accept',json.dumps({
+                                                                    'owner_id': self.user[i].id,
+                                                                    'user_id': CLIENT_NUMB - 1
+                                                                }),
+                                                                content_type='application/json')
+        expected_load = [
+                {
+                    'id': self.user[i].id,
+                    'username': self.user[i].username,
+                    'avatar': self.user[i].avatar.url,
+                    'is_online': True
+                }
+                for i in range(CLIENT_NUMB - 1) if i % 2 != 0
             ]
         response = self.client[CLIENT_NUMB - 1].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/friends/find_new')
         # print(response.json())
@@ -697,12 +715,12 @@ class BlockUser(TestCase):
         
     def test_block_some_user_and_find_new_friend(self):
         for i in range(CLIENT_NUMB - 1):
-            self.client[i].post(f'{self.url}notifications/friend_request',
-                                json.dumps({
-                                    'owner_id': self.user[i].id,
-                                    'user_id': self.user[CLIENT_NUMB - 1].id
-                                }),
-                                content_type='application/json') 
+            # self.client[i].post(f'{self.url}notifications/friend_request',
+            #                     json.dumps({
+            #                         'owner_id': self.user[i].id,
+            #                         'user_id': self.user[CLIENT_NUMB - 1].id
+            #                     }),
+            #                     content_type='application/json') 
             if i % 2 == 0:
                 self.client[i].post(f'{self.url}block',json.dumps({
                                                                     'owner_id': self.user[i].id,
