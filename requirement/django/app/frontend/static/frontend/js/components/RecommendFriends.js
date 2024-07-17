@@ -38,7 +38,7 @@ export class RecommendFriends extends HTMLElement {
 					</div>
 				</td>
 				<td>
-					<button id="${user.username+user.id}">
+					<button id="${user.username}FriendRequest" data-user="${user.id}">
 						<i class="uil uil-user-plus"></i> Send Request
 					</button>
 				</td>
@@ -52,17 +52,27 @@ export class RecommendFriends extends HTMLElement {
 		if (result) this.render(result)
 	};
 
-	// sendFriendRequest = async(friendId) => {
-	// 	console.log(`friend id is ${friendId}`)
-	// }
+	sendFriendRequest = async (e) => {
+		const payload = {
+			"owner_id": getUserId(),
+			"user_id": e.target.dataset.user
+		}
+		console.log(payload)
+		const result = await fetchJson("sendFriendRequest", "POST",
+			"/api/users/notifications/friend_request", payload)
+		if (result) {
+			console.log(result)
+			this.fetchRecommendFriends();
+		} 
+	}
 
 	render = (users) => {
 		const tableBody = this.shadowRoot.getElementById("recommendFriendsTableBody")
 		tableBody.innerHTML = ""
 		tableBody.innerHTML = this.generateRows(users)
 		for (const user of users) {
-			this.shadowRoot.getElementById(`${user.username}${user.id}`)
-				.addEventListener("click", ()=>console.log(user.username))
+			this.shadowRoot.getElementById(`${user.username}FriendRequest`)
+				.addEventListener("click", this.sendFriendRequest)
 		}
 	}
 
