@@ -22,9 +22,9 @@ amt:
 	$(MAKE) -C selenium
 	docker compose -f docker-compose.yaml down
 
-# automate test with selenuim 1 test
+# automate test with selenuim use test when have database
 amt1:
 	docker compose -f docker-compose.yaml up -d
 	sleep 2
-	$(MAKE) -C selenium one
+	$(MAKE) -C selenium
 	docker compose -f docker-compose.yaml down

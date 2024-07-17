@@ -80,12 +80,17 @@ async function friendRecommendNavigate(driver){
 	return el
 }
 
+async function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = {
 	testUser: configs.users[0],
-	friendRequest: configs.users[1],
+	friendRequest: configs.users[7],
 	login,
 	logout,
 	signup,
 	profileNavigate,
-	friendRecommendNavigate
+	friendRecommendNavigate,
+	sleep
 }
