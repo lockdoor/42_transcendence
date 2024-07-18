@@ -1,5 +1,4 @@
-// import { isTag } from "./Utils.js";
-import { addNavigate, getCSRFToken, getUserId } from "./utils.js";
+import { addNavigate, fetchJson, getUserAvatar, getUserName } from "./utils.js";
 
 export class Profile extends HTMLElement {
 	constructor() {
@@ -15,11 +14,13 @@ export class Profile extends HTMLElement {
 			
 			<div id="container">
 					<div id="profile-photo-big">
-						<img id="avatar" src="${window.location.origin+"/user-media/avatars/default.png"}" alt="Profile Photo"
+						<!--img id="avatar" src="${window.location.origin+"/user-media/avatars/default.png"}" alt="Profile Photo"
+						onerror="this.onerror=null; this.src='${window.location.origin+"/user-media/avatars/default.png"}';"-->
+						<img id="avatar" src="${window.location.origin+getUserAvatar()}" alt="Profile Photo"
 						onerror="this.onerror=null; this.src='${window.location.origin+"/user-media/avatars/default.png"}';">
 					</div>
 				<a id="profile-name">
-					<h4 id="username">Unknow</h4>
+					<h4 id="username">${getUserName()}</h4>
 				</a>
 				<div id="side-bar">
 					<div class="menu-item link-target" id="accountManagementLink" data-url="account-management" data-title="Baby cadet acount management">
@@ -59,87 +60,21 @@ export class Profile extends HTMLElement {
 		`;
 	};
 
-	render = (user) => {
-		const {username, avatar} = user
-		this.shadowRoot.getElementById("username").innerText = username
-		this.shadowRoot.getElementById("avatar").src = window.location.origin + "/" +avatar
-	}
-
-	fetchUser = async() => {
-		try {
-			const csrfToken = getCSRFToken();
-			if (!csrfToken) {
-				throw new Error("CSRF token not found");
-			}
-
-			const owner_id = getUserId()
-			if (!owner_id) {
-				throw new Error("userId not found");
-			}
-
-			const response = await fetch(`${window.location.origin}/api/users/${owner_id}/${owner_id}/profile`, {
-				method: 'GET',
-				credentials: "same-origin",
-				headers: {
-					"X-CSRFToken": csrfToken,
-					"Content-Type": "application/json"
-				},
-			});
-  
-			if (!response.ok) {
-				throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
-			}
-
-			const user = await response.json()
-			this.render(user)
-		} catch (error) {
-			console.error('Error fetchUser:', error);
-		}
-	}
-
 	logOut = async() => {
-		try {
-			console.log("logOut Clicked")
-			const csrfToken = getCSRFToken();
-			if (!csrfToken) {
-				throw new Error("CSRF token not found");
-			}
-
-			const response = await fetch(`${window.location.origin}/api/auth/logout`, {
-				method: 'POST',
-				credentials: "same-origin",
-				headers: {
-					"X-CSRFToken": csrfToken,
-					"Content-Type": "application/json"
-				},
-			});
-	
-			if (!response.ok) {
-				throw new Error(`Fetch error: ${response.status} ${response.statusText}`);
-			}
-			
-			// const json = await response.json()
-			// console.log(json)
-			// localStorage.clear();
-			window.location.replace(window.location.origin)
-		} catch (error) {
-			console.error('Error profile logout:', error);
-		}
+		const result = await fetchJson("logOut", "POST", `${window.location.origin}/api/auth/logout`)
+		if (result) window.location.replace(window.location.origin)
 	}
 
-	connectedCallback() {
-		this.fetchUser();
-		
+	connectedCallback() {		
 		this.shadowRoot.querySelector("#logOut").addEventListener("click", this.logOut)
 
 		// JavaScript to handle navigation and content loading
 		document.addEventListener('DOMContentLoaded', () => {
-			// console.log('DOMContentLoaded')
 			const parent = this.parentNode.parentNode
 			const mainFrame = parent.getElementById("mainFrame")
 
 			// Attach click event listener to navigation items
 			this.shadowRoot.querySelectorAll('.link-target').forEach(item => addNavigate(item, mainFrame));
-        });
+		});
 	}
 }

@@ -34,12 +34,12 @@ export class Notification extends HTMLElement{
 					</div>
 				</td>
 				<td>
-					<button id="${user.username}FriendRequest" data-user="${user.id}">
+					<button id="${user.username}FriendAccept" data-user="${user.user_id}">
 						<i class="uil uil-user-plus"></i> Accept
 					</button>
 				</td>
 				<td>
-				<button id="${user.username}FriendRequest" data-user="${user.id}">
+				<button id="${user.username}FriendDecline" data-user="${user.user_id}">
 					<i class="uil uil-user-plus"></i> Decline
 				</button>
 			</td>
@@ -47,9 +47,28 @@ export class Notification extends HTMLElement{
 		`).join('');
 	}
 
+	friendDecline = async (e) => {
+		const payload = {
+			"owner_id": getUserId(),
+			"user_id": e.target.dataset.user
+		}
+		console.log(payload)
+		const result = await fetchJson("friendDecline", "DELETE", 
+			"/api/users/notifications/delete", payload)
+		if (result) {
+			console.log(result)
+			this.fetchNotification()
+		}
+	}
+
 	render = (result) => {
-		this.shadowRoot.getElementById("notificationTableBody")
-			.innerHTML = this.generateRows(result)
+		const tableBody = this.shadowRoot.getElementById("notificationTableBody")
+		tableBody.innerHTML = ""
+		tableBody.innerHTML = this.generateRows(result)
+		for (const user of result) {
+			this.shadowRoot.getElementById(`${user.username}FriendDecline`)
+				.addEventListener("click", this.friendDecline)
+		}
 	}
 
 	fetchNotification = async() => {
@@ -57,6 +76,8 @@ export class Notification extends HTMLElement{
 		if (result) {
 			console.log(result)
 			this.render(result)
+		} else {
+			this.shadowRoot.getElementById("notificationTableBody").innerHTML = ""
 		}
 	}
 

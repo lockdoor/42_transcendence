@@ -1,9 +1,9 @@
 import { getUserId, addNavigate, fetchJson } from "./utils.js";
 
 export class Friends extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+	constructor() {
+		super();
+		this.attachShadow({ mode: "open" });
 		this.friends = []
 		this.shadowRoot.innerHTML = this.template()
 	}
@@ -29,9 +29,9 @@ export class Friends extends HTMLElement {
 		`;
 	};
 
-  generateRows(friends) {
-    return friends.map(
-      (friend) => `
+	generateRows(friends) {
+		return friends.map(
+			(friend) => `
 			<tr>
 				<td>
 					<div id="profile">
@@ -46,10 +46,10 @@ export class Friends extends HTMLElement {
 				</td>
 				<td>
 					<p class="${
-            friend.is_online == true
-              ? "status-online"
-              : "status-offline"
-          }">
+						friend.is_online == true
+							? "status-online"
+							: "status-offline"
+					}">
 						${ friend.is_online == true ? 'Online' : 'Offline'}
 					</p>
 				</td>
@@ -67,13 +67,13 @@ export class Friends extends HTMLElement {
 	fetchFriends = async () => {
 		const result = await fetchJson("fetchFriends", "GET", `/api/users/${getUserId()}/friends`)
 		if (result) this.render(result)
-  };
+	};
 
-  render(result) {
+	render(result) {
 		this.shadowRoot.getElementById('friendTableBody').innerHTML = this.generateRows(result)
-  }
+	}
 
-  connectedCallback() {
+	connectedCallback() {
 		this.fetchFriends()
 
 		// JavaScript to handle navigation and content loading

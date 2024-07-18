@@ -1,5 +1,6 @@
 const {until, By} = require ('selenium-webdriver')
 const configs = require ('./configs')
+const assert = require("assert");
 
 async function login(driver, user) {
 	const firstPage = await driver.findElement(By.id('firstPage'))
@@ -65,7 +66,8 @@ async function profileNavigate(driver, target, title, mainFrame) {
 	const targetEl = await profileShadowRoot.findElement(By.id(target))
 	await targetEl.click()
 	await driver.wait(until.titleIs(title), 10000)
-	await dashBoardShadowRoot.findElement(By.id(mainFrame))
+	const el = await dashBoardShadowRoot.findElement(By.id(mainFrame))
+	return el
 }
 
 async function friendRecommendNavigate(driver){
@@ -84,6 +86,22 @@ async function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function elementDisappear (parentEl, targetId) {
+	let targetAbsent = false;
+	try {
+		await parentEl.findElement(By.id(targetId))
+	}
+	catch (error) {
+		if (error.name === 'StaleElementReferenceError' || error.name == "NoSuchElementError") {
+			buttonAbsent = true;
+		} else {
+			throw error;
+		}
+		targetAbsent = true;
+	}
+	assert.equal(targetAbsent, true, `The ${targetId} should be absent`);
+}
+
 module.exports = {
 	testUser: configs.users[0],
 	friendRequest: configs.users[7],
@@ -92,5 +110,6 @@ module.exports = {
 	signup,
 	profileNavigate,
 	friendRecommendNavigate,
-	sleep
+	sleep,
+	elementDisappear
 }

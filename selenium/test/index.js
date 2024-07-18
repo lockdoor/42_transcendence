@@ -6,15 +6,16 @@ const testTitle = require("./testTitle")
 const testSignUp = require("./testSignUp")
 const testLogin = require("./testLogin")
 const testMainFrame = require("./testMainFrame")
-const testFriendRequest = require("./testFriendRequest.js")
+const testFriendRequest = require("./testFriendRequest")
+const testFriendDecline = require("./testFriendDecline")
 
 describe('Test Babycadet begin', function() {
-	this.timeout(30000);
+	this.timeout(60000);
 	let driver;
 
 	before(async () => {
 		driver = await new Builder().forBrowser('chrome').build();
-        await driver.get(configs.url);
+		await driver.get(configs.url);
 	});
 
 	it('should open and title is Baby cadet first page', async ()=>testTitle(driver));
@@ -26,6 +27,8 @@ describe('Test Babycadet begin', function() {
     it('test main frame', async () => testMainFrame(driver));
 
     it('test friend request', async () => testFriendRequest(driver));
+
+	it('test friend decline', async () => testFriendDecline(driver));
 
 	after(async () => {
 		await driver.quit();

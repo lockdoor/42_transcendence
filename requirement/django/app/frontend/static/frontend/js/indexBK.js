@@ -45,19 +45,19 @@ customElements.define("tournament-ongoing", TournamentOngoing);
 customElements.define("tournament-upcoming", TournamentUpcoming);
 
 export function navigateToForMainPage(path) {
-  const container = document.querySelector("main-page");
+	const container = document.querySelector("main-page");
 
-  if (path.indexOf("dashboard-page") > 0) {
-    if (container.shadowRoot.hasChildNodes())
-      container.shadowRoot.removeChild(container.shadowRoot.firstChild);
-    const textElement = document.createElement("dashBoard-page");
-    container.shadowRoot.appendChild(textElement);
-  } else if (path.indexOf("first-page") > 0) {
-    if (container.shadowRoot.hasChildNodes())
-      container.shadowRoot.removeChild(container.shadowRoot.firstChild);
-    const textElement = document.createElement("first-page");
-    container.shadowRoot.appendChild(textElement);
-  }
+	if (path.indexOf("dashboard-page") > 0) {
+	if (container.shadowRoot.hasChildNodes())
+		container.shadowRoot.removeChild(container.shadowRoot.firstChild);
+	const textElement = document.createElement("dashBoard-page");
+	container.shadowRoot.appendChild(textElement);
+	} else if (path.indexOf("first-page") > 0) {
+	if (container.shadowRoot.hasChildNodes())
+		container.shadowRoot.removeChild(container.shadowRoot.firstChild);
+	const textElement = document.createElement("first-page");
+	container.shadowRoot.appendChild(textElement);
+	}
 }
 
 // window.show_modal = () => {

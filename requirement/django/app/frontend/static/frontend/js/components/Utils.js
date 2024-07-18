@@ -13,6 +13,16 @@ export function getUserAvatar() {
 	return avatar ? avatar.value : null;
 }
 
+export function getUserName() {
+	const avatar = document.querySelector("[name=username]");
+	return avatar ? avatar.value : null;
+}
+
+/*
+** element is link item
+** target is element to expect change inner html eg. mainframe
+** ??? context is props to send when create element ???
+*/
 export function addNavigate(element, target) {
 	// Function to load content dynamically
 	const loadContent = (url) => {

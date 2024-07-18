@@ -1,7 +1,6 @@
 import { getUserAvatar } from "./utils.js";
 export class AccountManagment extends HTMLElement {
 	constructor() {
-		// console.log("Account");
 		super();
 		this.attachShadow({ mode: "open" });
 		this.shadowRoot.innerHTML = this.template();
@@ -34,7 +33,7 @@ export class AccountManagment extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log("delete Account Managment components");
+		// console.log("delete Account Managment components");
 	}
 }
 
