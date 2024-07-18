@@ -8,6 +8,7 @@ const testLogin = require("./testLogin")
 const testMainFrame = require("./testMainFrame")
 const testFriendRequest = require("./testFriendRequest")
 const testFriendDecline = require("./testFriendDecline")
+const testFriendAccept = require("./testFriendAccept")
 
 describe('Test Babycadet begin', function() {
 	this.timeout(60000);
@@ -20,15 +21,17 @@ describe('Test Babycadet begin', function() {
 
 	it('should open and title is Baby cadet first page', async ()=>testTitle(driver));
 
-    it('should signup', async () => testSignUp(driver));
+	it('should signup', async () => testSignUp(driver));
 
-    it('should login', async () => testLogin(driver));
+	it('should login', async () => testLogin(driver));
 
-    it('test main frame', async () => testMainFrame(driver));
+	it('test main frame', async () => testMainFrame(driver));
 
-    it('test friend request', async () => testFriendRequest(driver));
+	it('test friend request', async () => testFriendRequest(driver));
 
 	it('test friend decline', async () => testFriendDecline(driver));
+
+	it('test friend accept', async () => testFriendAccept(driver));
 
 	after(async () => {
 		await driver.quit();

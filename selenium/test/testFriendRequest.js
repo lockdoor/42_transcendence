@@ -1,16 +1,7 @@
 const { By } = require('selenium-webdriver');
 // const assert = require("assert");
 const configs = require("./configs")
-const {login, logout, friendRecommendNavigate, sleep, elementDisappear} = require("./utils");
-
-friendRequest = async (driver, user) => {
-	const friendRecommendComponent = friendRecommendNavigate(driver)
-	const shadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friendRecommendComponent)
-	const friendRequestBtn = await shadowRoot.findElement(By.id(`${user.username}FriendRequest`))
-	await friendRequestBtn.click()
-	await sleep (100)
-	await elementDisappear(shadowRoot, `${user.username}FriendRequest`)
-}
+const {login, logout, friendRecommendNavigate, friendRequest, elementDisappear} = require("./utils");
 
 testFriendRequest = async (driver) => {
 	await login(driver, configs.users[0])

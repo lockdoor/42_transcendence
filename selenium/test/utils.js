@@ -58,6 +58,9 @@ async function signup(driver, user) {
 	await driver.wait(until.urlContains('dashboard'), 10000);
 }
 
+/*
+** @login required 
+*/
 async function profileNavigate(driver, target, title, mainFrame) {
 	const dashBoard = await driver.findElement(By.id('dashBoardComponent'))
 	const dashBoardShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', dashBoard)
@@ -70,6 +73,9 @@ async function profileNavigate(driver, target, title, mainFrame) {
 	return el
 }
 
+/*
+** @login required 
+*/
 async function friendRecommendNavigate(driver){
 	const dashBoard = await driver.findElement(By.id('dashBoardComponent'))
 	const dashBoardShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', dashBoard)
@@ -84,6 +90,19 @@ async function friendRecommendNavigate(driver){
 
 async function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/*
+** @login required 
+** @user witch user to set request friend
+*/
+async function friendRequest (driver, user) {
+	const friendRecommendComponent = friendRecommendNavigate(driver)
+	const shadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friendRecommendComponent)
+	const friendRequestBtn = await shadowRoot.findElement(By.id(`${user.username}FriendRequest`))
+	await friendRequestBtn.click()
+	await sleep (100)
+	await elementDisappear(shadowRoot, `${user.username}FriendRequest`)
 }
 
 async function elementDisappear (parentEl, targetId) {
@@ -103,13 +122,12 @@ async function elementDisappear (parentEl, targetId) {
 }
 
 module.exports = {
-	testUser: configs.users[0],
-	friendRequest: configs.users[7],
 	login,
 	logout,
 	signup,
 	profileNavigate,
 	friendRecommendNavigate,
 	sleep,
+	friendRequest,
 	elementDisappear
 }

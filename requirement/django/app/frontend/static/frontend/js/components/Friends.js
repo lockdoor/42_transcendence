@@ -21,8 +21,7 @@ export class Friends extends HTMLElement {
 					</button>
 				</div>
 				<table>
-					<tbody id="friendsTableBody">
-						<div>No friend</div>
+					<tbody id="friendTableBody">
 					</tbody>
 				</table>
 			</div>
@@ -55,7 +54,7 @@ export class Friends extends HTMLElement {
 				</td>
 				<td>
 					<div id="icon">
-						<i class="uil uil-user"></i>
+						<i id="${`${friend.username}ProfileBtn`}" class="uil uil-user"></i>
 						<i class="uil uil-comment-dots"></i>
 						<i class="uil uil-upload"></i>
 					</div>
@@ -66,6 +65,7 @@ export class Friends extends HTMLElement {
 
 	fetchFriends = async () => {
 		const result = await fetchJson("fetchFriends", "GET", `/api/users/${getUserId()}/friends`)
+		console.log(result)
 		if (result) this.render(result)
 	};
 

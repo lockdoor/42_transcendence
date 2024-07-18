@@ -52,13 +52,32 @@ export class Notification extends HTMLElement{
 			"owner_id": getUserId(),
 			"user_id": e.target.dataset.user
 		}
-		console.log(payload)
+		// console.log(payload)
 		const result = await fetchJson("friendDecline", "DELETE", 
 			"/api/users/notifications/delete", payload)
 		if (result) {
 			console.log(result)
 			this.fetchNotification()
 		}
+	}
+
+	friendAccept = async (e) => {
+		const payload = {
+			"owner_id": getUserId(),
+			"user_id": e.target.dataset.user
+		}
+		const result = await fetchJson("friendAccept", "POST", 
+		"/api/users/friends/accept", payload)
+		if (result) {
+			console.log(result)
+			this.fetchNotification()
+			
+			//update friendsComponent
+			const dashBoard = document.getElementById("dashBoardComponent").shadowRoot
+			const friends = dashBoard.getElementById("friendsComponent")
+			friends.fetchFriends()
+		}
+		
 	}
 
 	render = (result) => {
@@ -68,6 +87,8 @@ export class Notification extends HTMLElement{
 		for (const user of result) {
 			this.shadowRoot.getElementById(`${user.username}FriendDecline`)
 				.addEventListener("click", this.friendDecline)
+			this.shadowRoot.getElementById(`${user.username}FriendAccept`)
+				.addEventListener("click", this.friendAccept)
 		}
 	}
 
