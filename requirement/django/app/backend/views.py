@@ -59,12 +59,15 @@ def get_csrf_token_and_session_id(request):
 def user_register(request):
     return render(request, 'backend/register.html')
 
-def getUserProfile(User, user, owner):
+def getUserProfile(User, user, owner, func):
     blocker = User.objects.get(id=user.id)
     try:
-        blockedlist = BlockedList.objects.get(blocked=owner, blocker=blocker)
-        if blockedlist:
-            return
+        if func == 'blocklist':
+            if BlockedList.objects.filter(blocked=owner, blocker=blocker).exists():
+                return
+        else:
+            if BlockedList.objects.filter(blocked=owner, blocker=blocker).exists() or BlockedList.objects.filter(blocked=blocker, blocker=owner).exists():
+                return
     except BlockedList.DoesNotExist:
         pass  
     return( {
@@ -341,7 +344,7 @@ def UserProfile(request, user_id, owner_id):
                         return JsonResponse({'error': 'User not found'}, status=404)     
                     avatar_url = f'{settings.MEDIA_ROOT}/{user.avatar}'
                     if avatar_url and os.path.exists(avatar_url):
-                        payload = getUserProfile(User=User, user=user, owner=owner)
+                        payload = getUserProfile(User=User, user=user, owner=owner, func='general')
                         if payload is None:
                             return JsonResponse({'error': 'User was blocked'}, status=401)
                     else:
@@ -475,7 +478,7 @@ def GetUserBlockedList(request, user_id):
                     blocked_set = BlockedList.objects.filter(blocker=user)
                 except BlockedList.DoesNotExist:
                     return JsonResponse({'error': 'Blockedlist not found'}, status=404)
-                blocked_list = [getUserProfile(User=User, user=blockeds.blocked, owner=user) for blockeds in blocked_set]
+                blocked_list = [getUserProfile(User=User, user=blockeds.blocked, owner=user, func='blocklist') for blockeds in blocked_set]
                 if len(blocked_list) == 0:
                     return JsonResponse({'error': 'BlockedList not found'}, status=404)
                 return JsonResponse(blocked_list, status=200 , safe=False)
@@ -502,7 +505,7 @@ def GetAllFriends(request, user_id):
                     friend_set = user.friend.all()
                     friends = []
                     for friend in friend_set:
-                        profile = getUserProfile(User=User, user=friend, owner=user)
+                        profile = getUserProfile(User=User, user=friend, owner=user, func='general')
                         if profile is not None:
                             friends.append(profile)
                     if len(friends) == 0:
@@ -533,7 +536,7 @@ def FindNewFriends(request, user_id):
                     for not_friend in not_friend_set:
                         if (not Notification.objects.filter(sender=user, accepter=not_friend).exists() and
                     not Notification.objects.filter(sender=not_friend, accepter=user).exists()):
-                            profile = getUserProfile(User=User, user=not_friend, owner=user)
+                            profile = getUserProfile(User=User, user=not_friend, owner=user, func='general')
                             if profile is not None:
                                 not_friends.append(profile)
                     if len(not_friends) == 0:
