@@ -633,7 +633,7 @@ class BlockUser(TestCase):
             response = self.client[CLIENT_NUMB - 1].post(f'{self.url}block',
                                                         json.dumps({
                                                                 'owner_id': self.user[CLIENT_NUMB - 1].id,
-                                                                 'user_id': self.user[i].id  
+                                                                'user_id': self.user[i].id  
                                                                 }),
                                                         content_type='application/json')
         
@@ -647,11 +647,12 @@ class BlockUser(TestCase):
             self.assertEqual(response.status_code, 401)
             self.assertEqual(response.json()['error'], 'User was blocked')
 
-        #Get blocked's profile by blocker should return 200
+        #Get blocked's profile by blocker should return 401
         for i in range(CLIENT_NUMB - 1):
             response = self.client[CLIENT_NUMB - 1].get((f'{self.url}{self.user[i].id}/{self.user[CLIENT_NUMB - 1].id}/profile'))
             
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.json()['error'], 'User was blocked')
     
     def test_block_some_friend_success(self): 
         #Get all friends should see everyone but friends who's blocker
@@ -978,7 +979,7 @@ class UnBlockUser(TestCase):
                                                             }),
                                                         content_type='application/json')
         #Before Unblock Uer should fail to get blocker UserProfile.
-        response = response = self.client[0].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/{self.user[0].id}/profile')
+        response = self.client[0].get(f'{self.url}{self.user[CLIENT_NUMB - 1].id}/{self.user[0].id}/profile')
         self.assertEqual(response.json()['error'], 'User was blocked')
         
         response = self.client[CLIENT_NUMB - 1].post(f'{self.url}unblock',json.dumps({
