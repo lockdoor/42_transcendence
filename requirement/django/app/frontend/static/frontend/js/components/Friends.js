@@ -31,15 +31,15 @@ export class Friends extends HTMLElement {
 	generateRows(friends) {
 		return friends.map(
 			(friend) => `
-			<tr>
+			<tr id="${friend.username}">
 				<td>
-					<div id="profile">
-						<div id="profile-photo">
+					<div class="profile">
+						<div class="profile-photo">
 							<img src="${friend.avatar}" alt="Profile Photo" 
-								onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
+							onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
 						</div>
-						<div id="profile-name">
-							<p><b>${friend.username}</b></p>
+						<div class="profile-name">
+							${friend.username}
 						</div>
 					</div>
 				</td>
@@ -53,8 +53,10 @@ export class Friends extends HTMLElement {
 					</p>
 				</td>
 				<td>
-					<div id="icon">
-						<i id="${`${friend.username}ProfileBtn`}" class="uil uil-user"></i>
+					<div>
+						<i id="${`${friend.username}ProfileBtn`}" class="uil uil-user"
+							data-url="friend-profile" data-title="baby cadet ${friend.username}"
+							data-user="${friend.id}"></i>
 						<i class="uil uil-comment-dots"></i>
 						<i class="uil uil-upload"></i>
 					</div>
@@ -64,20 +66,31 @@ export class Friends extends HTMLElement {
 	}
 
 	fetchFriends = async () => {
-		const result = await fetchJson("fetchFriends", "GET", `/api/users/${getUserId()}/friends`)
-		console.log(result)
+		const result = await fetchJson("fetchFriends", "GET", 
+			`/api/users/${getUserId()}/friends`)
+		// console.log(result)
 		if (result) this.render(result)
 	};
 
-	render(result) {
-		this.shadowRoot.getElementById('friendTableBody').innerHTML = this.generateRows(result)
+	render(friends) {
+		this.shadowRoot.getElementById('friendTableBody')
+			.innerHTML = this.generateRows(friends)
+
+		// add event for each button
+		const parent = this.parentNode.parentNode.parentNode
+		const mainFrame = parent.getElementById("mainFrame")
+		friends.forEach(friend => {
+			const friendProfileBtn = this.shadowRoot
+				.getElementById(`${friend.username}ProfileBtn`)
+			addNavigate(friendProfileBtn, mainFrame)
+		})
 	}
 
 	connectedCallback() {
 		this.fetchFriends()
 
 		// JavaScript to handle navigation and content loading
-		document.addEventListener('DOMContentLoaded', () => {
+		// document.addEventListener('DOMContentLoaded', () => {
 			// console.log('DOMContentLoaded')
 			const parent = this.parentNode.parentNode.parentNode
 			const mainFrame = parent.getElementById("mainFrame")
@@ -85,6 +98,6 @@ export class Friends extends HTMLElement {
 			// Attach click event listener to navigation items
 			const friendRecommendBtn = this.shadowRoot.querySelector('#friendRecommendBtn')
 			addNavigate(friendRecommendBtn, mainFrame)
-		})
+		// })
 	}
 }

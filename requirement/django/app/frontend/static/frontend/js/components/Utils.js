@@ -21,11 +21,11 @@ export function getUserName() {
 /*
 ** element is link item
 ** target is element to expect change inner html eg. mainframe
-** ??? context is props to send when create element ???
+** props to send when create element
 */
 export function addNavigate(element, target) {
 	// Function to load content dynamically
-	const loadContent = (url) => {
+	const loadContent = (url, props ={}) => {
 		// Fetch content from server or set it directly
 		// For demo purposes, let's just set it directly
 		const content = {
@@ -34,9 +34,17 @@ export function addNavigate(element, target) {
 			'statistic': '<statistic-component id="statisticComponent"></statistic-component>',
 			'match-history': '<match-history-component id="matchHistoryComponent"></match-history-component>',
 			'blocked-list': '<blocked-list-component id="blockedListComponent"></blocked-list-component>',
-			'recommend-friend': '<recommend-friend-component id="recommendFriendComponent"></recommend-friend-component>'
+			'recommend-friend': '<recommend-friend-component id="recommendFriendComponent"></recommend-friend-component>',
+			'friend-profile': `<friend-profile-component id="friendProfileComponent" data-user="${props.user || ''}"></friend-profile-component>`
 		};
 		target.innerHTML = content[url] || 'Content not found';
+
+		// Pass props to the loaded content
+		if (url === 'friend-profile' && props.user) {
+			const friendProfileComponent = target.querySelector('#friendProfileComponent');
+			friendProfileComponent.setAttribute('data-user', props.user);
+			// You can add more props as needed
+		}
 	}
 
 	// Function to handle navigation
@@ -44,14 +52,20 @@ export function addNavigate(element, target) {
 		const url = el.getAttribute('data-url');
 		const title = el.getAttribute('data-title') || "Baby cadet no content";
 
+		// Get context data for specific urls
+		const props = {};
+		if (url === 'friend-profile') {
+			props.user = el.getAttribute('data-user');
+		}
+
 		// Push state to history
 		// history.pushState({url: url}, title, `/${url}`);
 		// do not put url to address bar because when refresh it take 404
-		history.pushState({url: url}, title);
+		history.pushState({url: url, props: props}, title);
 		document.title = title; // Change the document title
 
 		// Load the content
-		loadContent(url);
+		loadContent(url, props);
 		
 		//debug
 		// console.log(element)
@@ -63,7 +77,7 @@ export function addNavigate(element, target) {
 	// Handle back/forward button
 	window.addEventListener('popstate', (event) => {
 		if (event.state) {
-			loadContent(event.state.url);
+			loadContent(event.state.url, event.state.props);
 		}
 	});
 }

@@ -10,6 +10,7 @@ import { Statistic } from "./components/Statistic.js"
 import { MatchHistory } from "./components/MatchHistory.js"
 import { BlockedList } from "./components/BlockedList.js"
 import { RecommendFriends } from "./components/RecommendFriends.js"
+import { FriendProfile } from "./components/FriendProfile.js"
 
 
 customElements.define("dashboard-component", DashBoardPage)
@@ -24,3 +25,4 @@ customElements.define("statistic-component", Statistic)
 customElements.define("match-history-component", MatchHistory)
 customElements.define("blocked-list-component", BlockedList)
 customElements.define("recommend-friend-component", RecommendFriends)
+customElements.define("friend-profile-component", FriendProfile)

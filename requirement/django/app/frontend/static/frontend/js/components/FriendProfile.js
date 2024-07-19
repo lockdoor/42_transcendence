@@ -1,4 +1,7 @@
+import { fetchJson, getUserId } from "./utils.js";
+
 export class FriendProfile extends HTMLElement {
+	
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
@@ -19,8 +22,8 @@ export class FriendProfile extends HTMLElement {
 						
 					</div>
 					<div id="detail">
-						<div id="name">
-							<b>Sarah<b>
+						<div id="username">
+							Sarah
 						</div>
 						<a class="menu-item">
 							<span><i class="uil uil-globe"></i></span>
@@ -42,16 +45,31 @@ export class FriendProfile extends HTMLElement {
 				<div id="button-block">
 					<button id="block">
 							<i class="uil uil-user-times"></i> Block
-						</button>
+					</button>
 				</div>
 			</div>
 		`;
 	};
 
 	connectedCallback() {
-		// this.shadowRoot.innerHTML = this.template();
+		this.fetchUserProfile(this.dataset.user)
 	}
 
+	render = (user) => {
+		this.shadowRoot.getElementById("photo")
+			.innerHTML = `<img src="${user.avatar}" alt="Profile Photo" 
+		onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">`
+		this.shadowRoot.getElementById("username").innerText = user.username
+	}
+
+	fetchUserProfile = async (userId) => {
+		const user = await fetchJson("fetchUserProfile", "GET", 
+			`/api/users/${userId}/${getUserId()}/profile`)
+		if (user) {
+			this.render(user)
+		}
+	}
+	
 	disconnectedCallback() {
 		console.log("delete Friend Profile components");
 	}

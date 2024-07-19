@@ -35,13 +35,13 @@ table tbody td {
 	padding-left: 1vw; 
 }
 
-#profile {
+.profile {
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 }
 
-#profile #profile-photo {
+.profile .profile-photo {
 	width: 2.7rem;
 	height: 2.7rem;
 	border-radius: 0.75rem;
@@ -49,7 +49,7 @@ table tbody td {
 	position: relative; 
 }
 
-#profile #profile-photo img {
+.profile .profile-photo img {
 	display: block; /* Remove default inline spacing */
 	width: 100%; 
 	height: 100%; 
