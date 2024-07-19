@@ -23,7 +23,7 @@ export class FriendProfile extends HTMLElement {
 					</div>
 					<div id="detail">
 						<div id="username">
-							Sarah
+							Unknow
 						</div>
 						<a class="menu-item">
 							<span><i class="uil uil-globe"></i></span>
@@ -75,15 +75,25 @@ export class FriendProfile extends HTMLElement {
 		}
 		const result = await fetchJson("blockFriend", "POST", "/api/users/block", payload)
 		if (result){
-			console.log(result)
+			// console.log(result)
+			// re render friendsComponent
+			const dashBoardComponent = document.getElementById("dashBoardComponent")
+			const friendsComponent = dashBoardComponent.shadowRoot.getElementById("friendsComponent")
+			friendsComponent.fetchFriends()
+
+			// navigate to blocked list
+			const profileComponent = dashBoardComponent.shadowRoot.getElementById("profileComponent")
+			const blockedListBtn = profileComponent.shadowRoot.getElementById("blockedListLink")
+			blockedListBtn.click()
 		}
 	}
 
 	fetchUserProfile = async (userId) => {
-		const user = await fetchJson("fetchUserProfile", "GET", 
+		const result = await fetchJson("fetchUserProfile", "GET", 
 			`/api/users/${userId}/${getUserId()}/profile`)
-		if (user) {
-			this.render(user)
+		console.log(result)
+		if (result) {
+			this.render(result)
 		}
 	}
 	

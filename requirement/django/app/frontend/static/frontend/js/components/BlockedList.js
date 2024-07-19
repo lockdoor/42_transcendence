@@ -39,7 +39,7 @@ export class BlockedList extends HTMLElement {
 					</div>
 				</td>
 				<td>
-					<button>
+					<button id="${user.username}UnBlockBtn" data-userid="${user.id}">
 						<i class="uil uil-user-check"></i> Unblock
 					</button>
 				</td>
@@ -50,13 +50,39 @@ export class BlockedList extends HTMLElement {
 	render = (users) => {
 		const blockedListTableBody = this.shadowRoot.getElementById("blockedListTableBody")
 		blockedListTableBody.innerHTML = this.generateRows(users)
+		// const trEl = this.shadowRoot.querySelectorAll("tr")
+		// console.log(trEl)
+		users.forEach(user => {
+			const unBlockBtn = this.shadowRoot.getElementById(`${user.username}UnBlockBtn`)
+			// console.log(unBlockBtn)
+			unBlockBtn.addEventListener("click", this.unBlockFriend)
+		})
+	}
+
+	unBlockFriend = async(e) => {
+		const payload = {
+			owner_id: getUserId(),
+			user_id: e.target.dataset.userid
+		}
+		const result = await fetchJson("unBlockFriend", "POST", "/api/users/unblock", payload)
+		console.log(result)
+		if (result) {
+			this.fetchFriendBlocked()
+
+			// re render friendsComponent
+			const dashBoardComponent = document.getElementById("dashBoardComponent")
+			const friendsComponent = dashBoardComponent.shadowRoot.getElementById("friendsComponent")
+			friendsComponent.fetchFriends()
+		}
 	}
 
 	fetchFriendBlocked = async () => {
-		const result = await fetchJson("fetchFriendBlocked", "GET", 
+		const result = await fetchJson("fetchFriendBlocked", "GET",
 			`/api/users/${getUserId()}/blocked_list`)
 		if(result){
 			this.render(result)
+		} else {
+			this.shadowRoot.getElementById("blockedListTableBody").innerHTML = ""
 		}
 	}
 

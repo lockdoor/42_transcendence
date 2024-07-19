@@ -70,6 +70,7 @@ export class Friends extends HTMLElement {
 			`/api/users/${getUserId()}/friends`)
 		// console.log(result)
 		if (result) this.render(result)
+		else this.shadowRoot.getElementById('friendTableBody').innerHTML = ""
 	};
 
 	render(friends) {
