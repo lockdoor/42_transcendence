@@ -110,7 +110,7 @@
     align-items: center;
 }
 
-#block {
+#blockBtn {
 	margin-top: 0rem;
 	width: 6rem;
 	height: 2rem;
@@ -123,7 +123,7 @@
 	color: white;
 }
 
-#block i {
+#blockBtn i {
 	font-size: 1.2rem;
 	color: white;
 }

@@ -43,7 +43,7 @@ export class FriendProfile extends HTMLElement {
 					</div>
 				</div>
 				<div id="button-block">
-					<button id="block">
+					<button id="blockBtn">
 							<i class="uil uil-user-times"></i> Block
 					</button>
 				</div>
@@ -60,6 +60,23 @@ export class FriendProfile extends HTMLElement {
 			.innerHTML = `<img src="${user.avatar}" alt="Profile Photo" 
 		onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">`
 		this.shadowRoot.getElementById("username").innerText = user.username
+		const blockBtn = this.shadowRoot.getElementById("blockBtn")
+		blockBtn.setAttribute("data-userid", user.id)
+		blockBtn.addEventListener("click", this.blockFriend)
+
+	}
+
+	blockFriend = async(e) => {
+		// console.log(e.target)
+		// console.log(e.target.dataset.userid)
+		const payload = {
+			owner_id: getUserId(),
+			user_id: e.target.dataset.userid
+		}
+		const result = await fetchJson("blockFriend", "POST", "/api/users/block", payload)
+		if (result){
+			console.log(result)
+		}
 	}
 
 	fetchUserProfile = async (userId) => {

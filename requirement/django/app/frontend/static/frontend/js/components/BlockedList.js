@@ -1,30 +1,10 @@
-const Mock_list = [
-	{
-		name: 'Sarah',
-		profileImg: '../images/profile-2.jpg'
-	},
-	{
-		name: 'Jenny',
-		profileImg: '../images/profile-2.jpg'
-	},
-	{
-		name: 'Lin',
-		profileImg: '../images/profile-2.jpg'
-	},
-	{
-		name: 'Mint',
-		profileImg: '../images/profile-2.jpg'
-	},
-	{
-		name: 'Kim',
-		profileImg: '../images/profile-2.jpg'
-	}
-];
+import { fetchJson, getUserId } from "./utils.js";
 
 export class BlockedList extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: "open" });
+		this.shadowRoot.innerHTML = this.template();
 	}
 
 	template = () => {
@@ -37,24 +17,24 @@ export class BlockedList extends HTMLElement {
 					<h4>Blocked List</h4>
 				</div>
 				<table>
-					<tbody>
-						${this.generateRows()}
+					<tbody id="blockedListTableBody">
 					</tbody>
 				</table>
 			</div>
 		`;
 	};
 
-	generateRows() {
-		return Mock_list.map(list => `
-			<tr>
+	generateRows(users) {
+		return users.map(user => `
+			<tr id="${user.username}">
 				<td>
 					<div id="profile">
 						<div id="profile-photo">
-							<img src="${list.profileImg}" alt="Profile Photo">
+						<img src="${user.avatar}" alt="Profile Photo" 
+							onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
 						</div>
 						<div id="profile-name">
-							<p><b>${list.name}</b></p>
+							${user.username}
 						</div>
 					</div>
 				</td>
@@ -67,8 +47,21 @@ export class BlockedList extends HTMLElement {
 		`).join('');
 	}
 
+	render = (users) => {
+		const blockedListTableBody = this.shadowRoot.getElementById("blockedListTableBody")
+		blockedListTableBody.innerHTML = this.generateRows(users)
+	}
+
+	fetchFriendBlocked = async () => {
+		const result = await fetchJson("fetchFriendBlocked", "GET", 
+			`/api/users/${getUserId()}/blocked_list`)
+		if(result){
+			this.render(result)
+		}
+	}
+
 	connectedCallback() {
-		this.shadowRoot.innerHTML = this.template();
+		this.fetchFriendBlocked()
 	}
 
 	disconnectedCallback() {
