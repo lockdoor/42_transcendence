@@ -271,7 +271,8 @@ def UserLogout(request):
 
 #1.4 POST /api/auth/login42
 def UserLogin42(request):
-    if request.method == 'POST':
+    # if request.method == 'POST':
+    if request.method == 'GET':
         client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
         authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
         request.session['oauth_state'] = state
@@ -316,16 +317,13 @@ def callback(request):
         # return JsonResponse({
         #             'message': 'Redirect 2fa',
         #             }, status=200)
+        # return redirect ("frontend:dashboard");
         return redirect (two_factor_auth)
     else:
         login(request, user)
         user.is_online = True
         user.save()
-        return JsonResponse({
-                    'message': 'Login success',
-                    'owner_id': user.id
-                    }, status=200)
-    # return redirect('frontend:dashboard')
+        return redirect ("frontend:dashboard");
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):
