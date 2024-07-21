@@ -3,7 +3,7 @@ const { login, logout, sleep } = require('./utils');
 const configs = require ('./configs');
 const assert = require("assert");
 
-testFriendProfile = async (driver) => {
+testFriendProfile = async (driver, next=null) => {
 	await login(driver, configs.users[0])
 
 	const dashBoardComponent = await driver.findElement(By.id("dashBoardComponent"))
@@ -19,7 +19,7 @@ testFriendProfile = async (driver) => {
 		const friendProfileBtn = await el.findElement(By.id(`${friendName}ProfileBtn`))
 		await friendProfileBtn.click()
 
-		await sleep(500)
+		await sleep(configs.timeWait)
 		const friendProfileComponent = await dashBoardShadowRoot
 			.findElement(By.id("friendProfileComponent"))
 		const friendProfileShadowRoot = await driver
@@ -27,8 +27,21 @@ testFriendProfile = async (driver) => {
 		const usernameEl = await friendProfileShadowRoot.findElement(By.id("username"))
 		const username = await usernameEl.getText()
 
-		await sleep(500)
+		await sleep(configs.timeWait)
 		assert.equal (friendName, username, "friend profile should show in mainframe")
+
+		// if (next) {
+		// 	const context = {
+		// 		driver,
+		// 		username,
+		// 		dashBoardShadowRoot,
+		// 		friendsShadowRoot,
+		// 		friendProfileComponent,
+		// 		friendTableBody,
+		// 		friendProfileShadowRoot
+		// 	}
+		// 	next(context)
+		// }
 	}
 	
 	await logout(driver)

@@ -10,6 +10,7 @@ const testFriendRequest = require("./testFriendRequest")
 const testFriendDecline = require("./testFriendDecline")
 const testFriendAccept = require("./testFriendAccept")
 const testFriendProfile = require("./testFriendProfile")
+const testFriendBlocked = require("./testFriendBlocked")
 
 describe('Test Babycadet begin', function() {
 	this.timeout(60000);
@@ -34,7 +35,9 @@ describe('Test Babycadet begin', function() {
 
 	it('test friend accept', async () => testFriendAccept(driver));
 
-	it('test friend profile', async () => testFriendProfile(driver));	
+	it('test friend profile', async () => testFriendProfile(driver));
+
+	it('test friend blocked', async () => testFriendBlocked(driver));
 
 	after(async () => {
 		await driver.quit();

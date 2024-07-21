@@ -1,5 +1,6 @@
 module.exports = {
 	url: "http://localhost:8000",
+	timeWait: 100,
 	users: [
 		{
 			username: "pnamnil",

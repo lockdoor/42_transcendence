@@ -101,7 +101,7 @@ async function friendRequest (driver, user) {
 	const shadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friendRecommendComponent)
 	const friendRequestBtn = await shadowRoot.findElement(By.id(`${user.username}FriendRequest`))
 	await friendRequestBtn.click()
-	await sleep (100)
+	await sleep (configs.timeWait)
 	await elementDisappear(shadowRoot, `${user.username}FriendRequest`)
 }
 

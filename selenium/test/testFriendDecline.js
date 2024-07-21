@@ -13,7 +13,7 @@ friendDecline = async (driver, user, declineUser) => {
 	const declineBtn = await notificationShadowRoot
 		.findElement(By.id(`${declineUser.username}FriendDecline`))
 	await declineBtn.click()
-	await sleep(100)
+	await sleep(configs.timeWait)
 	await elementDisappear(notificationShadowRoot, `${declineUser.username}FriendDecline`)
 
 	await logout(driver)
