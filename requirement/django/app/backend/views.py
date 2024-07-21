@@ -209,20 +209,18 @@ def UserLogin(request):
                 request.session['refresh_token'] = jwt_token.get('refresh')
                 login(request, user)
                 user.save()
-                return JsonResponse({
-                            'message': 'Redirect 2fa',
-                            }, status=200)
+                return redirect (two_factor_auth)
             else:
                 login(request, user)
                 user.is_online = True
                 user.save()
+                # return redirect ("frontend:dashboard")
                 return JsonResponse({
                             'message': 'Login success',
                             'owner_id': user.id
                             }, status=200)
         else:
             return JsonResponse({'error': 'Invalid username or password'}, status=401)    
-        # return redirect('frontend:dashboard')
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
@@ -271,7 +269,7 @@ def UserLogout(request):
 
 #1.4 POST /api/auth/login42
 def UserLogin42(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
         client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
         authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
         request.session['oauth_state'] = state
@@ -301,7 +299,7 @@ def callback(request):
     username = user_info['login']
     user_id = user_info['id']
     hash_password = make_password(f'{username}{user_id}')
-    # request.session['userinfo'] = user_info
+
     if User.objects.filter(username=username).exists():
         user = User.objects.get(username=username)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -313,19 +311,12 @@ def callback(request):
         request.session['access_token'] = jwt_token['access']
         request.session['refresh_token'] = jwt_token['refresh']
         user.save()
-        # return JsonResponse({
-        #             'message': 'Redirect 2fa',
-        #             }, status=200)
         return redirect (two_factor_auth)
     else:
         login(request, user)
         user.is_online = True
         user.save()
-        return JsonResponse({
-                    'message': 'Login success',
-                    'owner_id': user.id
-                    }, status=200)
-    # return redirect('frontend:dashboard')
+        return redirect ("frontend:dashboard")
 
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):

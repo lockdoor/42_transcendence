@@ -38,9 +38,9 @@ export class ModalLogin extends HTMLElement {
 				</div>
 				<div id="signInWith">
 					<h4 class="gray">Sign In with</h4>
-					<button id="btn42">
+					<a href="${window.location.origin}/api/auth/login42"><button id="btn42">
 						<img src="./static/frontend/images/42eco.png" alt="42 icon">
-					</button>
+					</button></a>
 				</div>
 			</div>
 		`;
