@@ -15,4 +15,8 @@ def dashboard(request):
         "username": request.user.username,
         "avatar": f'{settings.MEDIA_URL}{request.user.avatar}'
     }
+    if (settings.ALLOW_API_WITHOUT_JWT == False):
+        context['access_token'] = request.session['access_token']
+        context['refresh_token'] = request.session['refresh_token']
+
     return render(request, "dashboard.html", {"user": context})

@@ -13,6 +13,11 @@
     <input type="hidden" name="owner_id" value="{{ user.id }}">
     <input type="hidden" name="username" value="{{ user.username }}">
     <input type="hidden" name="avatar" value="{{ user.avatar }}">
+
+    {% if user.access_token %}
+        <input type="hidden" name="access_token" value="{{ user.access_token }}">
+        <input type="hidden" name="refresh_token" value="{{ user.refresh_token }}">
+    {% endif %}
     <dashboard-component id="dashBoardComponent"></dashboard-component>
 </body>
 </html>

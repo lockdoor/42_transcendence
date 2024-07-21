@@ -102,6 +102,12 @@ export async function fetchJson(name, method, url, payload = null){
 			request.body = JSON.stringify(payload)
 		}
 
+		const access_token = document.querySelector("[name=access_token]")
+		if (access_token){
+			console.log(access_token.value)
+			request.headers["Authorization"] = `Bearer ${access_token.value}`
+		}
+
 		const response = await fetch(url, request);
 
 		const result = await response.json()
