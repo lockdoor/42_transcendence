@@ -69,7 +69,7 @@ def getUserProfile(User, user, owner, func):
             if BlockedList.objects.filter(blocked=owner, blocker=blocker).exists() or BlockedList.objects.filter(blocked=blocker, blocker=owner).exists():
                 return
     except BlockedList.DoesNotExist:
-        pass  
+        pass
     return( {
         'id': user.id,
         'username': user.username,
@@ -90,7 +90,7 @@ def getUserNotification(User, noti, request):
     return( {
         'noti_id': noti.id,
         'user_id': user.id,
-        'username': user.username,
+        'username': user.username, 
         'avatar': user.avatar.url,
         'is_online': user.is_online
     })
@@ -333,9 +333,10 @@ def UserProfile(request, user_id, owner_id):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -362,9 +363,10 @@ def UpdateUserAvatar(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     user_id = request.POST.get('user_id')
-                    err = jwt_and_auth_validate(request, user_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -395,9 +397,10 @@ def BlockUser(request):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to block themselves'}, status=400)
                     User = get_user_model()
@@ -432,9 +435,10 @@ def UnblockUser(request):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to unblock themselves'}, status=400) 
                     User = get_user_model()
@@ -588,9 +592,10 @@ def AcceptFriend(request):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to accept friend to themselves'}, status=400) 
                     User = get_user_model()
@@ -630,9 +635,10 @@ def SendFriendRequest(request):
             user_id = data.get('user_id')
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err
                     if (owner_id == user_id):
                         return JsonResponse({'error': 'Users try to send request to themselves'}, status=400) 
                     User = get_user_model()
@@ -667,9 +673,10 @@ def DeleteNotification(request):
             # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    err = jwt_and_auth_validate(request, owner_id)
-                    if err is not None:
-                        return err              
+                    if settings.ALLOW_API_WITHOUT_JWT == False:
+                        err = jwt_manual_validate(request)
+                        if err is not None:
+                            return err              
                     User = get_user_model()
                     try:    
                         accpeter = User.objects.get(id=owner_id)
