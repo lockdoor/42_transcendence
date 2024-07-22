@@ -192,7 +192,7 @@ def jwt_and_auth_validate(request, owner_id):
             return err
     if settings.ALLOW_API_WITHOUT_AUTH == False:
         if request.user.id != owner_id:
-            return JsonResponse({'error': 'Session mismatch'}, status=401)
+            return ({'error': 'Session mismatch'})
     return
 
 #1.1 POST /api/auth/login
@@ -259,7 +259,7 @@ def UserLogout(request):
             if settings.ALLOW_API_WITHOUT_JWT == False:
                 err = jwt_manual_validate(request)
                 if err is not None:
-                    return err
+                    return JsonResponse(err, status=401)
             User = get_user_model()
             user = User.objects.get(id=request.user.id)
             user.is_online = False
@@ -330,7 +330,7 @@ def UserProfile(request, user_id, owner_id):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     User = get_user_model()
@@ -360,7 +360,7 @@ def UpdateUserAvatar(request):
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     user_id = request.POST.get('user_id')
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, user_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     User = get_user_model()
@@ -394,7 +394,7 @@ def BlockUser(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
@@ -432,7 +432,7 @@ def UnblockUser(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
@@ -466,7 +466,7 @@ def GetUserBlockedList(request, user_id):
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                 if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, user_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                 User = get_user_model()
@@ -494,7 +494,7 @@ def GetAllFriends(request, user_id):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, user_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     User = get_user_model()
@@ -523,7 +523,7 @@ def FindNewFriends(request, user_id):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, user_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     User = get_user_model()
@@ -554,7 +554,7 @@ def GetNotifications(request, user_id):
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                 if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, user_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                 User = get_user_model()
@@ -589,7 +589,7 @@ def AcceptFriend(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
@@ -632,7 +632,7 @@ def SendFriendRequest(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)
                     if (owner_id == user_id):
@@ -670,7 +670,7 @@ def DeleteNotification(request):
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_manual_validate(request)
+                        err = jwt_and_auth_validate(request, owner_id)
                         if err is not None:
                             return JsonResponse(err, status=401)              
                     User = get_user_model()
