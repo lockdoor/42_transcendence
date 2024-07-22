@@ -119,13 +119,16 @@ def jwt_manual_validate(request):
         auth = JWTAuthentication()
         header = auth.get_header(request)
         if header is None:
-            return JsonResponse({'error': 'JWT token is missing'}, status=401)
+            return ({'error': 'JWT token is missing'})
+            # return JsonResponse({'error': 'JWT token is missing'}, status=401)
         raw_token = auth.get_raw_token(header)
         jwt.decode(raw_token, settings.SECRET_KEY, algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
     except ExpiredSignatureError:
-        return JsonResponse({'error': 'Token has expired'}, status=401)
+        return ({'error': 'Token has expired'})
+        # return JsonResponse({'error': 'Token has expired'}, status=401)
     except Exception:
-        return JsonResponse({'error': 'Authentication failed'}, status=401)
+        return ({'error': 'Authentication failed'})
+        # return JsonResponse({'error': 'Authentication failed'}, status=401)
     return
 
 def generate_totp_secret(request):
@@ -209,7 +212,8 @@ def UserLogin(request):
                 request.session['refresh_token'] = jwt_token.get('refresh')
                 login(request, user)
                 user.save()
-                return redirect (two_factor_auth)
+                return JsonResponse({'message': '2fa'}, status=200)
+                # return redirect (two_factor_auth) #change to message redirect to 2fa
             else:
                 login(request, user)
                 user.is_online = True
@@ -311,7 +315,8 @@ def callback(request):
         request.session['access_token'] = jwt_token['access']
         request.session['refresh_token'] = jwt_token['refresh']
         user.save()
-        return redirect (two_factor_auth)
+        return JsonResponse({'message': '2fa'}, status=200)
+        # return redirect (two_factor_auth)
     else:
         login(request, user)
         user.is_online = True
@@ -327,7 +332,7 @@ def UserProfile(request, user_id, owner_id):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -357,7 +362,7 @@ def UpdateUserAvatar(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     User = get_user_model()
                     try:
                         user = User.objects.get(id = user_id)
@@ -391,7 +396,7 @@ def BlockUser(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to block themselves'}, status=400)
                     User = get_user_model()
@@ -429,7 +434,7 @@ def UnblockUser(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to unblock themselves'}, status=400) 
                     User = get_user_model()
@@ -463,7 +468,7 @@ def GetUserBlockedList(request, user_id):
                 if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                 User = get_user_model()
                 try:
                     user = User.objects.get(id=user_id)
@@ -491,7 +496,7 @@ def GetAllFriends(request, user_id):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     User = get_user_model()
                     try:
                         user = User.objects.get(id=user_id)
@@ -520,7 +525,7 @@ def FindNewFriends(request, user_id):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     User = get_user_model()
                     try:
                         user = User.objects.get(id=user_id)
@@ -551,7 +556,7 @@ def GetNotifications(request, user_id):
                 if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                 User = get_user_model()
                 try:
                     user = User.objects.get(id=user_id)
@@ -586,7 +591,7 @@ def AcceptFriend(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     if (request.user.id == user_id):
                         return JsonResponse({'error': 'Users try to accept friend to themselves'}, status=400) 
                     User = get_user_model()
@@ -629,7 +634,7 @@ def SendFriendRequest(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err
+                            return JsonResponse(err, status=401)
                     if (owner_id == user_id):
                         return JsonResponse({'error': 'Users try to send request to themselves'}, status=400) 
                     User = get_user_model()
@@ -667,7 +672,7 @@ def DeleteNotification(request):
                     if settings.ALLOW_API_WITHOUT_JWT == False:
                         err = jwt_manual_validate(request)
                         if err is not None:
-                            return err              
+                            return JsonResponse(err, status=401)              
                     User = get_user_model()
                     try:    
                         accpeter = User.objects.get(id=owner_id)

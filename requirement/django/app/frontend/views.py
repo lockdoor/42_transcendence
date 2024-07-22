@@ -1,9 +1,20 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
+from backend.views import jwt_manual_validate
+from django.contrib.auth import logout
+from django.http import JsonResponse
 
 # Create your views here.
 def index(request):
     if request.user.is_authenticated:
+        if settings.ALLOW_API_WITHOUT_JWT == False:
+            err = jwt_manual_validate(request)
+            if err is not None:
+                if err['error'] == 'JWT token is missing':
+                    logout(request)
+                    return render(request, "index.html")
+                else:
+                    return JsonResponse(err, status=401)
         return redirect('frontend:dashboard')
     return render(request, "index.html")
 
