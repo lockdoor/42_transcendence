@@ -274,12 +274,10 @@ def UserLogout(request):
 
 #1.4 POST /api/auth/login42
 def UserLogin42(request):
-    if request.method == 'GET':
-        client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
-        authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
-        request.session['oauth_state'] = state
-        return redirect(authorization_url)
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+    client = OAuth2Session(settings.CLIENT_ID, redirect_uri=settings.REDIRECT_URI)
+    authorization_url, state = client.create_authorization_url(settings.AUTHORIZATION_URL)
+    request.session['oauth_state'] = state
+    return redirect(authorization_url)
 
 def callback(request):
     if 'oauth_token' in request.session:
