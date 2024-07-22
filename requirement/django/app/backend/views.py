@@ -206,7 +206,8 @@ def UserLogin(request):
         password = data.get('password')
 
         if request.user.is_authenticated:
-            return JsonResponse({'error': 'User is already logged in'}, status=400)
+            return redirect ("frontend:dashboard")
+            # return JsonResponse({'error': 'User is already logged in'}, status=400)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -282,7 +283,8 @@ def UserLogin42(request):
 
 def callback(request):
     if 'oauth_token' in request.session:
-        return JsonResponse({'error': 'User is already logged in'}, status=400)
+        return redirect ("frontend:dashboard")
+        # return JsonResponse({'error': 'User is already logged in'}, status=400)
     
     stored_state = request.session.get('oauth_state')
     received_state = request.GET.get('state')
@@ -312,8 +314,8 @@ def callback(request):
     if settings.ALLOW_API_WITHOUT_JWT == False:
         login(request, user)
         user.save()
-        return JsonResponse({'message': '2fa'}, status=200)
-        # return redirect (two_factor_auth)
+        # return JsonResponse({'message': '2fa'}, status=200)
+        return redirect (two_factor_auth)
     else:
         login(request, user)
         user.is_online = True
