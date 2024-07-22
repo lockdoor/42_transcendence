@@ -38,33 +38,39 @@ export class ModalLogin extends HTMLElement {
 				</div>
 				<div id="signInWith">
 					<h4 class="gray">Sign In with</h4>
-					<a href="${window.location.origin}/api/auth/login42"><button id="btn42">
-						<img src="./static/frontend/images/42eco.png" alt="42 icon">
-					</button></a>
+						<button id="btn42">
+							<img src="./static/frontend/images/42eco.png" alt="42 icon">
+						</button>
 				</div>
 			</div>
 		`;
 	}
 
 	login = async(e)=>{
-        e.preventDefault()
-        const data = {
-            username: this.shadowRoot.querySelector("#username").value,
-            password: this.shadowRoot.querySelector("#password").value
-        }
-        const result = await fetchJson("login", "POST", "api/auth/login", data)
-        // alert(JSON.stringify(result))
-        if (result) {
-            if(result.message === '2fa') {
-                window.location.replace(window.location.origin + "/api/2fa-page")
-            } else {
-                window.location.replace(window.location.origin + "/dashboard")
-            }
-        }
-    }
+		e.preventDefault()
+		const data = {
+			username: this.shadowRoot.querySelector("#username").value,
+			password: this.shadowRoot.querySelector("#password").value
+		}
+		const result = await fetchJson("login", "POST", "api/auth/login", data)
+		// alert(JSON.stringify(result))
+		if (result) {
+			if(result.message === '2fa') {
+				window.location.replace(window.location.origin + "/api/2fa-page")
+			} else {
+				window.location.replace(window.location.origin + "/dashboard")
+			}
+		}
+	}
+	
+	login42 = (e) => {
+		e.preventDefault()
+		window.location.replace(`${window.location.origin}/api/auth/login42`)	
+	}
 
 	connectedCallback(){
 		this.shadowRoot.getElementById("signInForm").addEventListener('submit', this.login)
+		this.shadowRoot.getElementById("btn42").addEventListener('click', this.login42)
 	}
 
 	disconnectedCallback(){
