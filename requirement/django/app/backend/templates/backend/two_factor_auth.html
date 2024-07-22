@@ -84,7 +84,8 @@
                     // window.location.href = "/api";
                     // /api/access/:access/refresh/:refresh
 
-                    window.location.href = `${window.location.origin}/dashboard`
+                    // window.location.href = `${window.location.origin}/dashboard`
+                    window.location.replace(`${window.location.origin}/dashboard`)
                 } else {
                     alert(data.error);
                     window.location.href = "/";
