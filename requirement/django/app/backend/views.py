@@ -167,6 +167,9 @@ def verify_totp(request):
             user = request.user
             totp = pyotp.TOTP(user.totp_secret)
             if totp.verify(otp):
+                jwt_token = get_token_for_authenticated_user(request)
+                request.session['access_token'] = jwt_token['access']
+                request.session['refresh_token'] = jwt_token['refresh']
                 access_token = request.session['access_token']
                 refresh_token = request.session['refresh_token']
                 user.is_online = True
@@ -207,9 +210,6 @@ def UserLogin(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             if settings.ALLOW_API_WITHOUT_JWT == False:
-                jwt_token = get_jwt_token(username, password)
-                request.session['access_token'] = jwt_token.get('access')
-                request.session['refresh_token'] = jwt_token.get('refresh')
                 login(request, user)
                 user.save()
                 return JsonResponse({'message': '2fa'}, status=200)
@@ -311,9 +311,6 @@ def callback(request):
         user = User.objects.create_user(username=username, password=hash_password)
     if settings.ALLOW_API_WITHOUT_JWT == False:
         login(request, user)
-        jwt_token = get_token_for_authenticated_user(request)
-        request.session['access_token'] = jwt_token['access']
-        request.session['refresh_token'] = jwt_token['refresh']
         user.save()
         return JsonResponse({'message': '2fa'}, status=200)
         # return redirect (two_factor_auth)

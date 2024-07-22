@@ -47,14 +47,21 @@ export class ModalLogin extends HTMLElement {
 	}
 
 	login = async(e)=>{
-		e.preventDefault()
-		const data = {
-			username: this.shadowRoot.querySelector("#username").value,
-			password: this.shadowRoot.querySelector("#password").value
-		}
-		const result = await fetchJson("login", "POST", "api/auth/login", data)
-		if (result) window.location.replace(window.location.origin + "/dashboard")
-	}
+        e.preventDefault()
+        const data = {
+            username: this.shadowRoot.querySelector("#username").value,
+            password: this.shadowRoot.querySelector("#password").value
+        }
+        const result = await fetchJson("login", "POST", "api/auth/login", data)
+        // alert(JSON.stringify(result))
+        if (result) {
+            if(result.message === '2fa') {
+                window.location.replace(window.location.origin + "/api/2fa-page")
+            } else {
+                window.location.replace(window.location.origin + "/dashboard")
+            }
+        }
+    }
 
 	connectedCallback(){
 		this.shadowRoot.getElementById("signInForm").addEventListener('submit', this.login)
