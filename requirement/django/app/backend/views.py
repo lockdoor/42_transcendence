@@ -23,6 +23,21 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+class CustomRefreshToken(RefreshToken):
+    @property
+    def access_token(self):
+        token = super().access_token
+        CustomUser = get_user_model()
+        # Add custom claims
+        token['user_id'] = self['user_id']
+        user = CustomUser.objects.get(id=self['user_id'])
+        token['username'] = user.username
+        token['score'] = user.score
+        token['is_online'] = user.is_online
+        token['avatar'] = user.avatar.url if user.avatar else None
+
+        return token
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -34,6 +49,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_online'] = user.is_online
         token['avatar'] = user.avatar.url if user.avatar else None
 
+        print(token)
         return token
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -103,12 +119,15 @@ def get_jwt_token(username, password):
                                         'password': password
                             }), 
                             content_type='application/json')
+    print("Response Status Code:", response.status_code)
+    print("Response Content:", response.content)
+    
     token = response.json()
     return token
 
 def get_token_for_authenticated_user(request):
     if request.user.is_authenticated:
-        refresh = RefreshToken.for_user(request.user)
+        refresh = CustomRefreshToken.for_user(request.user)
         return ({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
