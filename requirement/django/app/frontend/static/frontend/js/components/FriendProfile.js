@@ -91,14 +91,14 @@ export class FriendProfile extends HTMLElement {
 	fetchUserProfile = async (userId) => {
 		const result = await fetchJson("fetchUserProfile", "GET", 
 			`/api/users/${userId}/${getUserId()}/profile`)
-		console.log(result)
+		// console.log(result)
 		if (result) {
 			this.render(result)
 		}
 	}
 	
 	disconnectedCallback() {
-		console.log("delete Friend Profile components");
+		// console.log("delete Friend Profile components");
 	}
 }
 

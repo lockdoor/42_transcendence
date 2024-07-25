@@ -31,37 +31,13 @@ export class Friends extends HTMLElement {
 	generateRows(friends) {
 		return friends.map(
 			(friend) => `
-			<tr id="${friend.username}">
-				<td>
-					<div class="profile">
-						<div class="profile-photo">
-							<img src="${friend.avatar}" alt="Profile Photo" 
-							onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
-						</div>
-						<div class="profile-name">
-							${friend.username}
-						</div>
-					</div>
-				</td>
-				<td>
-					<p class="${
-						friend.is_online == true
-							? "status-online"
-							: "status-offline"
-					}">
-						${ friend.is_online == true ? 'Online' : 'Offline'}
-					</p>
-				</td>
-				<td>
-					<div>
-						<i id="${`${friend.username}ProfileBtn`}" class="uil uil-user"
-							data-url="friend-profile" data-title="baby cadet ${friend.username}"
-							data-user="${friend.id}"></i>
-						<i class="uil uil-comment-dots"></i>
-						<i class="uil uil-upload"></i>
-					</div>
-				</td>
-			</tr>
+			<friend-component 
+				id="${friend.username}"
+				data-username="${friend.username}" 
+				data-id="${friend.id}"
+				data-avatar="${friend.avatar}"
+			>
+			</friend-component>
 		`).join('');
 	}
 
@@ -78,13 +54,13 @@ export class Friends extends HTMLElement {
 			.innerHTML = this.generateRows(friends)
 
 		// add event for each button
-		const parent = this.parentNode.parentNode.parentNode
-		const mainFrame = parent.getElementById("mainFrame")
-		friends.forEach(friend => {
-			const friendProfileBtn = this.shadowRoot
-				.getElementById(`${friend.username}ProfileBtn`)
-			addNavigate(friendProfileBtn, mainFrame)
-		})
+		// const parent = this.parentNode.parentNode.parentNode
+		// const mainFrame = parent.getElementById("mainFrame")
+		// friends.forEach(friend => {
+		// 	const friendProfileBtn = this.shadowRoot
+		// 		.getElementById(`${friend.username}ProfileBtn`)
+		// 	addNavigate(friendProfileBtn, mainFrame)
+		// })
 	}
 
 	connectedCallback() {

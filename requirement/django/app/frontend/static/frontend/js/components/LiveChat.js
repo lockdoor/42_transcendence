@@ -1,3 +1,7 @@
+// want props {username}
+// to find chatroom name in database
+// can send with username as attribute
+
 export class LiveChat extends HTMLElement {
 	constructor() {
 		super();

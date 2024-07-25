@@ -66,10 +66,11 @@ SIMPLE_JWT = {
 }
 
 # Application definition
-
 INSTALLED_APPS = [
+    'daphne',
     'frontend',
     'backend',
+    'chat',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -109,8 +110,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'transcendence.wsgi.application'
+# WSGI_APPLICATION = 'transcendence.wsgi.application'
 
+ASGI_APPLICATION = 'transcendence.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

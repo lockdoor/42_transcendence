@@ -18,7 +18,7 @@ friendAccept = async (driver, user) => {
 	const dashBoardShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', dashBoard)
 	const friends = await dashBoardShadowRoot.findElement(By.id('friendsComponent'))
 	const friendsShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friends)
-	await friendsShadowRoot.findElement(By.id(`${user.username}ProfileBtn`))
+	await friendsShadowRoot.findElement(By.id(`${user.username}`))
 }
 
 testFriendAccept = async (driver) => {
