@@ -213,7 +213,7 @@ def jwt_and_auth_validate(request, owner_id):
         if err is not None:
             return err
     if settings.ALLOW_API_WITHOUT_AUTH == False:
-        if request.user.id != owner_id:
+        if request.user.id != int(owner_id):
             return ({'error': 'Session mismatch'})
     return
 
@@ -371,32 +371,32 @@ def UserProfile(request, user_id, owner_id):
 #2.1.2 POST /api/users/update_avatar
 def UpdateUserAvatar(request):
     if request.method == 'POST':
-            # if request.user.is_authenticated:
-            if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
-                if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
-                    user_id = request.POST.get('user_id')
-                    if settings.ALLOW_API_WITHOUT_JWT == False:
-                        err = jwt_and_auth_validate(request, user_id)
-                        if err is not None:
-                            return JsonResponse(err, status=401)
-                    User = get_user_model()
-                    try:
-                        user = User.objects.get(id = user_id)
-                    except User.DoesNotExist:
-                        return JsonResponse({'error': 'User not found'}, status=404)
-                    avatar = request.FILES.get('avatar')
-                    if avatar:
-                        old_avatar_path = user.avatar
-                        if old_avatar_path != f'avatars/default.png' and os.path.isfile(f'{settings.MEDIA_ROOT}/{old_avatar_path}'):
-                            os.remove(f'{settings.MEDIA_ROOT}/{old_avatar_path}')
-                        user.avatar = avatar
-                        user.save()
-                        return JsonResponse({'message': 'User update avatar success'}, status=200)
-    
-                    else:
-                        return JsonResponse({'error': 'Not Found the avatar file'}, status=404) 
-            else:
-                return JsonResponse({'error': 'User is not logged in'}, status=401)
+        # if request.user.is_authenticated:
+        if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
+            if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
+                user_id = request.POST.get('user_id')
+                if settings.ALLOW_API_WITHOUT_JWT == False:
+                    err = jwt_and_auth_validate(request, user_id)
+                    if err is not None:
+                        return JsonResponse(err, status=401)
+                User = get_user_model()
+                try:
+                    user = User.objects.get(id = user_id)
+                except User.DoesNotExist:
+                    return JsonResponse({'error': 'User not found'}, status=404)
+                avatar = request.FILES.get('avatar')
+                if avatar:
+                    old_avatar_path = user.avatar
+                    if old_avatar_path != f'avatars/default.png' and os.path.isfile(f'{settings.MEDIA_ROOT}/{old_avatar_path}'):
+                        os.remove(f'{settings.MEDIA_ROOT}/{old_avatar_path}')
+                    user.avatar = avatar
+                    user.save()
+                    return JsonResponse({'message': 'User update avatar success'}, status=200)
+
+                else:
+                    return JsonResponse({'error': 'Not Found the avatar file'}, status=404) 
+        else:
+            return JsonResponse({'error': 'User is not logged in'}, status=401)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
