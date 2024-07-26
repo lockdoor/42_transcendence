@@ -83,6 +83,7 @@ async function friendRecommendNavigate(driver){
 	const friendsShadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friends)
 	const friendRecommendBtn = await friendsShadowRoot.findElement(By.id('friendRecommendBtn'))
 	await friendRecommendBtn.click()
+	await sleep(configs.timeWait)
 	await driver.wait(until.titleIs("Baby cadet friend recommend"), 10000)
 	const el = await dashBoardShadowRoot.findElement(By.id("recommendFriendComponent"))
 	return el
@@ -121,6 +122,11 @@ async function elementDisappear (parentEl, targetId) {
 	assert.equal(targetAbsent, true, `The ${targetId} should be absent`);
 }
 
+async function findShadowRoot(driver, parent, componentId){
+	const component = await parent.findElement(By.id(componentId))
+	return await driver.executeScript('return arguments[0].shadowRoot', component)
+}
+
 module.exports = {
 	login,
 	logout,
@@ -129,5 +135,6 @@ module.exports = {
 	friendRecommendNavigate,
 	sleep,
 	friendRequest,
-	elementDisappear
+	elementDisappear,
+	findShadowRoot
 }

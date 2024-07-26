@@ -1,12 +1,12 @@
 const { By } = require('selenium-webdriver');
-const { sleep, elementDisappear, login, logout, profileNavigate } = require("./utils")
+const { sleep, elementDisappear, login, logout, profileNavigate, findShadowRoot } = require("./utils")
 const configs = require("./configs") 
 const assert = require("assert");
 
-findShadowRoot = async (driver, parent, componentId) => {
-	const component = await parent.findElement(By.id(componentId))
-	return await driver.executeScript('return arguments[0].shadowRoot', component)
-}
+// findShadowRoot = async (driver, parent, componentId) => {
+// 	const component = await parent.findElement(By.id(componentId))
+// 	return await driver.executeScript('return arguments[0].shadowRoot', component)
+// }
 
 testFriendBlocked = async (driver) => {
 	await login(driver, configs.users[0])
