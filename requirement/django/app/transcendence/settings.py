@@ -40,7 +40,7 @@ SECRET_KEY = 'django-insecure-y#kbgupk0%s9!y$@=qz-382qm%ndes!e#h&^bkw9yt0&k2#mu=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', '10.19.243.95']
 SESSION_COOKIE_AGE = 7200  #seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -66,10 +66,11 @@ SIMPLE_JWT = {
 }
 
 # Application definition
-
 INSTALLED_APPS = [
+    'daphne',
     'frontend',
     'backend',
+    'chat',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -109,8 +110,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'transcendence.wsgi.application'
+# WSGI_APPLICATION = 'transcendence.wsgi.application'
 
+ASGI_APPLICATION = 'transcendence.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

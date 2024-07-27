@@ -56,6 +56,7 @@ export function addNavigate(element, target) {
 		const props = {};
 		if (url === 'friend-profile') {
 			props.user = el.getAttribute('data-user');
+			// console.log(props.user)
 		}
 
 		// Push state to history
@@ -121,4 +122,10 @@ export async function fetchJson(name, method, url, payload = null){
 	} catch (error) {
 		console.error(`Error fetching ${name}:`, error);
 	}
+}
+
+export function getMainFrame() {
+	const dashBoardComponent = document.getElementById("dashBoardComponent")
+	const mainFrame = dashBoardComponent.shadowRoot.getElementById("mainFrame")
+	return mainFrame
 }

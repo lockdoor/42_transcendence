@@ -13,7 +13,8 @@ testFriendRequest = async (driver) => {
 	await login(driver, configs.users[1])
 
 	const friendRecommendComponent = friendRecommendNavigate(driver)
-	const shadowRoot = await driver.executeScript('return arguments[0].shadowRoot', friendRecommendComponent)
+	const shadowRoot = await driver
+		.executeScript('return arguments[0].shadowRoot', friendRecommendComponent)
 	await elementDisappear(shadowRoot, `${configs.users[0].username}FriendRequest`)
 	for (let i = 2; i < configs.users.length; i++) {
 		await friendRequest(driver, configs.users[i])

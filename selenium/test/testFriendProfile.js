@@ -29,19 +29,6 @@ testFriendProfile = async (driver, next=null) => {
 
 		await sleep(configs.timeWait)
 		assert.equal (friendName, username, "friend profile should show in mainframe")
-
-		// if (next) {
-		// 	const context = {
-		// 		driver,
-		// 		username,
-		// 		dashBoardShadowRoot,
-		// 		friendsShadowRoot,
-		// 		friendProfileComponent,
-		// 		friendTableBody,
-		// 		friendProfileShadowRoot
-		// 	}
-		// 	next(context)
-		// }
 	}
 	
 	await logout(driver)

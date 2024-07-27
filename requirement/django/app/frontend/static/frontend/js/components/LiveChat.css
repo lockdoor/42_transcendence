@@ -11,4 +11,52 @@
 	padding-top: 1px;
 	padding-left: 20px;
 	color: #4FD1C5;
+	height: inherit;
+}
+
+#chatroom {
+	height: inherit;
+	display: flex;
+	flex-direction: column;
+}
+
+#chatMessages {
+    flex: 1; /* Takes up remaining space */
+    overflow-y: auto; /* Allows scrolling */
+    padding: 10px; /* Optional: adds some padding */
+}
+
+#messageForm {
+    display: flex;
+    padding: 10px; /* Optional: adds some padding */
+    background: #f1f1f1; /* Optional: adds background color */
+}
+
+#messageForm input {
+    flex: 1; /* Takes up remaining space within the form */
+    padding: 5px;
+}
+
+#messageForm button {
+    padding: 5px 10px;
+}
+
+.owner-message{
+	color: red;
+}
+
+.owner-message .message{
+	display: flex;
+	justify-content: end;
+}
+
+.owner-message .username{
+	display: flex;
+	justify-content: end;
+}
+
+.username {
+	font-size: 0.6em;
+	color: darkgrey;
+	font-style: italic;
 }

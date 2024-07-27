@@ -4,6 +4,7 @@ import { Tournament } from "./components/Tournament.js"
 import { TournamentUpcoming } from "./components/TournamentUpcoming.js"
 import { Notification } from "./components/Notification.js"
 import { Friends } from "./components/Friends.js"
+import { Friend } from "./components/Friend.js"
 import { LiveChat } from "./components/LiveChat.js"
 import { AccountManagment } from "./components/AccountManagment.js"
 import { Statistic } from "./components/Statistic.js"
@@ -19,6 +20,7 @@ customElements.define("tournament-component", Tournament)
 customElements.define("tournament-upcomming-component", TournamentUpcoming)
 customElements.define("notification-component", Notification)
 customElements.define("friends-component", Friends)
+customElements.define("friend-component", Friend)
 customElements.define("live-chat-component", LiveChat)
 customElements.define("account-management-component", AccountManagment)
 customElements.define("statistic-component", Statistic)
