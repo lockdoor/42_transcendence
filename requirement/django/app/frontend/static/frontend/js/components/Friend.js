@@ -43,33 +43,50 @@ export class Friend extends HTMLElement {
 		`
 	}
 
+	setupWebsocket = (result) => {
+		this.socket = new WebSocket(
+			`${window.location.origin}/ws/chatroom/${result.chatroom}`)
+
+		// Listen for messages
+		this.socket.addEventListener("message", (event) => {
+			const obj = JSON.parse(event.data)
+
+			if (obj.type == "online_count_handler") {
+				const status = this.shadowRoot.getElementById("status")
+				if (obj.online_count > 0) {
+					status.innerText = 'Online'
+					status.classList = 'status-online'
+				} else {
+					status.innerText = 'Offline'
+					status.classList = 'status-offline'
+				}
+			}
+			else if (obj.type == "message_handler") {
+				const dashBoardComponent = document.getElementById("dashBoardComponent")
+				const liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
+				liveChat.updateChatRoom(obj)
+				// console.log(obj.message)
+			}
+		});
+	}
+
 	fetchChatRoom = async () => {
 		const result = await fetchJson("fetchChatRoom", "GET", 
-			`${window.location.origin}/chat/${this.dataset.username}`)
+			`${window.location.origin}/chat/get/${this.dataset.username}`)
+		
 		if (result) {
-			console.log(result.chatroom)
-			this.socket = new WebSocket(
-				`${window.location.origin}/ws/chatroom/${result.chatroom}`)
+			// console.log(result.chatroom)
+			this.setupWebsocket(result)
 
-			// Listen for messages
-			this.socket.addEventListener("message", (event) => {
-				// console.log("Message from server: ", event.data);
-				const obj = JSON.parse(event.data)
-				if (obj.type == "online_count_handler") {
-					const status = this.shadowRoot.getElementById("status")
-					if (obj.online_count > 0) {
-						status.innerText = 'Online'
-						status.classList = 'status-online'
-					} else {
-						status.innerText = 'Offline'
-						status.classList = 'status-offline'
-					}
-				}
-			});
-			// this.socket.onmessage = (event) => {
-			// 	const data = JSON.parse(event.data);
-			// 	console.log(event.data);
-			// };
+			const dashBoardComponent = document.getElementById("dashBoardComponent")
+			const dashBoardShadowRoot = dashBoardComponent.shadowRoot
+			const liveChatComponent = dashBoardShadowRoot.getElementById("liveChatComponent")
+			const chatBtn = this.shadowRoot.getElementById("chatBtn")
+			chatBtn.addEventListener('click', ()=>{
+				liveChatComponent.setAttribute("data-chatroom", result.chatroom)
+				liveChatComponent.setAttribute("data-username", this.dataset.username)
+				liveChatComponent.setAttribute("data-userid", this.dataset.id)
+			})
 		}
 	}
 

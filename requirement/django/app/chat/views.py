@@ -1,9 +1,21 @@
 # from django.shortcuts import render
 from django.http import JsonResponse
+from django.core import serializers
 from django.contrib.auth import get_user_model
 from .models import *
+import sys
 
 # Create your views here.
+def private_chat_messages(request, chatroom_name):
+  chat_group = ChatGroup.objects.get(group_name=chatroom_name)
+  if chat_group is None:
+    return JsonResponse({'error': 'Chatroom not found'}, status=404)
+  if not chat_group.is_private:
+    return JsonResponse({'error': 'Chatroom is not private'}, status=400)
+  chat_messages = chat_group.chat_messages.all()[:30][::-1]
+  data = serializers.serialize('json', chat_messages)
+  return JsonResponse(data, safe=False,  status=200)
+
 
 # return room_name as json
 # {chatroom: <room_name>}

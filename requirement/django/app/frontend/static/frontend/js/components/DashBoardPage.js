@@ -45,7 +45,7 @@ export class DashBoardPage extends HTMLElement {
 				</div>
 				<div id="div-right">
 					<friends-component id="friendsComponent"></friends-component>
-					<live-chat-component></live-chat-component>
+					<live-chat-component id="liveChatComponent"></live-chat-component>
 				</div>
 			</div>
 
