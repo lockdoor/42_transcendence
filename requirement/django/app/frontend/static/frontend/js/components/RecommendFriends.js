@@ -49,7 +49,12 @@ export class RecommendFriends extends HTMLElement {
 	fetchRecommendFriends = async () => {
 		const result = await fetchJson("fetchRecommendFriends", 
 			"GET", `/api/users/${getUserId()}/friends/find_new`)
-		if (result) this.render(result)
+		if (result){
+			this.render(result)
+			// console.log(result)
+		} else {
+			this.shadowRoot.getElementById("recommendFriendsTableBody").innerHTML = ""
+		}
 	};
 
 	sendFriendRequest = async (e) => {
@@ -57,11 +62,11 @@ export class RecommendFriends extends HTMLElement {
 			"owner_id": getUserId(),
 			"user_id": e.target.dataset.user
 		}
-		console.log(payload)
+		// console.log(payload)
 		const result = await fetchJson("sendFriendRequest", "POST",
 			"/api/users/notifications/friend_request", payload)
 		if (result) {
-			console.log(result)
+			// console.log(result)
 			this.fetchRecommendFriends();
 		} 
 	}

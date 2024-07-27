@@ -47,9 +47,21 @@ export class Friends extends HTMLElement {
 		// console.log(result)
 		if (result) this.render(result)
 		else this.shadowRoot.getElementById('friendTableBody').innerHTML = ""
+
+		// live_chat still bug 
+		const dashBoardComponent = document.getElementById("dashBoardComponent")
+		let liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
+		liveChat.remove()
+		liveChat = document.createElement('live-chat-component')
+		liveChat.setAttribute("id", "liveChatComponent")
+		dashBoardComponent.shadowRoot.getElementById("div-right").appendChild(liveChat)
+		// liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
+		
 	};
 
 	render(friends) {
+		this.shadowRoot.getElementById('friendTableBody')
+		.innerHTML = ""
 		this.shadowRoot.getElementById('friendTableBody')
 			.innerHTML = this.generateRows(friends)
 

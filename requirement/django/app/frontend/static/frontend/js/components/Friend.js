@@ -101,8 +101,9 @@ export class Friend extends HTMLElement {
 		* use fetch to get <room_name>
 		* this.socket = new WebSocket("ws://localhost:8000/<room_name>")
 		*/
+	}
 
-
-
+	disconnectedCallback() {
+		console.log('has gone')
 	}
 }

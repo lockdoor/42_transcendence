@@ -108,4 +108,8 @@ export class LiveChat extends HTMLElement {
 		//fetch old chat
 		this.fetchChatRoom(newValue)
 	}
+
+	resetLiveChat = () => {
+		this.shadowRoot.innerHTML = this.template()
+	}
 }
