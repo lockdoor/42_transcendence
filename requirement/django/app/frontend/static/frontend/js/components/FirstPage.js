@@ -8,31 +8,37 @@ export class FirstPage extends HTMLElement {
 	template = () => {
 		return `
 			<link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
-			<link rel="stylesheet" href="./static/frontend/js/components/firstPage.css">
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+			<link rel="stylesheet" href="./static/frontend/js/components/FirstPage.css">
 			
-			<div id="nav">
-				<div id="bg">
-					<button id="signInBtn">SIGN IN</button>
-					<p id="textJoin">to join the TOURNAMENT ! Or </p>
-					<button id="signUpBtn">SIGN UP</button>
+			<div id="nav" class="d-flex align-items-center justify-content-center container-fluid h-8 position-relative">
+				<div id="bg" class="d-flex align-items-center justify-content-center container-fluid h-5">
+					<div id="textJoin" class="d-flex align-items-center">
+						<button id="signInBtn" class="btn btn-light">SIGN IN</button>
+						<p class="text-light d-none d-sm-flex">to join the TOURNAMENT !</p>
+					</div>
+					<div id="textOr" class="d-flex align-items-center ms-3">
+						<p class="text-light d-none d-sm-flex mb-0">or</p>
+						<button id="signUpBtn" class="btn btn-light ms-2">SIGN UP</button>
+					</div>
 				</div>
 			</div>
 			
-			<div id="gameTag">
+			<div id="gameTag" class="container-fluid h-89 mb-0">
 				<p>Game</p>
 			</div>
 			
-			<div id="footer">
+			<div id="footer" class="d-flex align-items-center justify-content-center container-fluid h-3 position-fixed bottom-0 start-0">
 				<p>
 					@ 2024, Made with 
 					<i class="uil uil-heart-alt"></i> 
 					by 
-					<span>42 Baby Cadet</span>
+					<span class="fw-bold">42 Baby Cadet</span>
 				</p>
 			</div>
 
-			<modal-login-component id="modalLoginComponent" style="display: none;"></modal-login-component>
-			<modal-sign-up-component id="modalSignUpComponent" style="display: none;"></modal-sign-up-component>
+			<modal-login-component id="modalLoginComponent" class="position-fixed top-50 start-50 translate-middle w-75 bg-white p-3 shadow"></modal-login-component>
+			<modal-sign-up-component id="modalSignUpComponent" class="position-fixed top-50 start-50 translate-middle w-75 mw-500 bg-white p-3 shadow"></modal-sign-up-component>
 		`;
 	};
 
