@@ -29,7 +29,7 @@
         form {
             margin-top: 20px;
         }
-        input[type="text"], input[type="submit"] {
+        input[type="email"], input[type="submit"] {
             padding: 10px;
             margin: 5px;
             border-radius: 5px;
@@ -59,52 +59,39 @@
 </head>
 <body>
     <div class="container">
-        <h1>Two-Factor Authentication</h1>
-        <form id="otp-form" action="{% url 'verify_totp' %}" method="post">
+        <h2>Fill your email for sending regenerate code</h2>
+        <form id="email-form" action="{% url 'pre_regen' %}" method="post">
             {% csrf_token %}
-            <label for="otp">Enter OTP:</label>
-            <input type="text" id="otp" name="otp" required>
-            <input type="submit" value="Verify">
-        </form>
-        <form action="{% url 'pre_regen_page' %}">
-            {% csrf_token %}
-            <button type="submit">regenerate QR-code</button>
+            <label for="email">Your email:</label>
+            <input type="email" id="email" name="email" required>
+            <input type="submit" value="Submit">
         </form>
     </div>
     <script>
-        document.getElementById('otp-form').addEventListener('submit', function(event) {
+        document.getElementById('email-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            var otp = document.getElementById('otp').value;
-            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-
-            fetch("{% url 'verify_totp' %}", {
-                method: "POST",
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
                 headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({otp: otp})
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === 'Login success') {
-                    // Save tokens to sessionStorage
-                    sessionStorage.setItem('access_token', data.access);
-                    sessionStorage.setItem('refresh_token', data.refresh);
-                    console.log("Access Token:", sessionStorage.getItem('access_token'));
-                    console.log("Refresh Token:", sessionStorage.getItem('refresh_token'));
-                    // Redirect to dashboard or any other page
-                    // window.location.href = "/api";
-                    // /api/access/:access/refresh/:refresh
-
-                    // window.location.href = `${window.location.origin}/dashboard`
-                    window.location.replace(`${window.location.origin}/dashboard`)
+                if (data.success) {
+                    location.replace(`${window.location.origin}/api/recover_qr`);
                 } else {
                     alert(data.error);
-                    window.location.href = "/";
+                    location.replace(`${window.location.origin}/`);
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
     </script>
 </body>

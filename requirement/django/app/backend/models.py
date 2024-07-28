@@ -1,6 +1,10 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+import datetime
 
 ############################## For Custom Auth User ##############################
 class CustomUserManager(BaseUserManager):
@@ -88,3 +92,46 @@ class Friendship(models.Model):
     def __str__(self):
         return f"{self.from_user.username} -> {self.to_user.username}"
 ############################## Friend List ##############################
+
+class PreRegister(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars', blank=True, null=True, default='avatars/default.png')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + datetime.timedelta(hours=24)  # Code valid for 24 hours
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+class ActivationCode(models.Model):
+    user = models.OneToOneField(PreRegister, on_delete=models.CASCADE)
+    code = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + datetime.timedelta(hours=1)  # Code valid for 24 hours
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+class RegenerateCode(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + datetime.timedelta(seconds=1800)  # Code valid for 24 hours
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at

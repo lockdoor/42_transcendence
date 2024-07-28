@@ -21,11 +21,11 @@ export class ModalSignUp extends HTMLElement {
 						placeholder="Your username" id="usernameSignUp" 
 						name="username" required>
 				</div>
-				<div id="passwordCon" class="d-flex align-items-center justify-content-center">
-					<label id="passLabel" for="password">Password</label>
-					<input class="input-css" type="password" 
-						placeholder="Your password" id="passwordSignUp" 
-						name="password" required>
+				<div id="emailCon" class="d-flex align-items-center justify-content-center">
+					<label id="passLabel" for="email">Email</label>
+					<input class="input-css" type="email" 
+						placeholder="your@host.domain" id="emailSignUp" 
+						name="email" required>
 				</div>
 				<div class="d-flex align-items-center justify-content-center">
 					<label for="avatar">Avatar</label>
@@ -57,7 +57,7 @@ export class ModalSignUp extends HTMLElement {
 
 			console.log(formData)
 
-			const response = await fetch(`api/auth/register`, {
+			const response = await fetch(`api/auth/pre-register`, {
 				method: 'POST',
 				credentials: "same-origin",
 				headers: {
@@ -68,10 +68,11 @@ export class ModalSignUp extends HTMLElement {
 
 			const result = await response.json();
 
-			if (response.status == 201) {
+			if (response.status == 200) {
 				console.log(result)
-				window.location.replace(window.location.origin + "/dashboard")
-			} else {
+				window.location.replace(window.location.origin + "/api/check_email")
+			}
+			else {
 				throw new Error(`${response.status} ${response.statusText} ${result.error}`);
 			}
 		} catch (error) {

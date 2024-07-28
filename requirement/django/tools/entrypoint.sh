@@ -10,4 +10,34 @@ else
     python manage.py startapp chat
 fi
 
+python manage.py shell << EOF
+
+#Clean Regenerate Code
+from backend.models import RegenerateCode, PreRegister, ActivationCode
+from django.contrib.sessions.models import Session
+
+print("Clearing all state...")
+
+#Clear expire regenration code for QR-code
+regen_codes = RegenerateCode.objects.all()
+for rc in regen_codes:
+    if rc.is_expired():
+        rc.delete()
+
+#Clear PreRegister
+pre_registers = PreRegister.objects.all()
+for pr in pre_registers:
+    ac = ActivationCode.objects.get(user=pr)
+    if ac.is_expired():
+        pr.delete()
+        ac.delete()
+        
+#Clear Session
+sessions = Session.objects.all()
+sessions.delete()
+
+print("All clean !")
+
+EOF
+
 exec "$@"

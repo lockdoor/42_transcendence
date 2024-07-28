@@ -54,9 +54,12 @@ export class ModalLogin extends HTMLElement {
 		const result = await fetchJson("login", "POST", "api/auth/login", data)
 		// alert(JSON.stringify(result))
 		if (result) {
-			if(result.message === '2fa') {
+			if(result.message === '2fa-qr') {
+				window.location.replace(window.location.origin + "/api/2fa-qr-page")
+			}else if(result.message === '2fa'){
 				window.location.replace(window.location.origin + "/api/2fa-page")
-			} else {
+			} 
+			else {
 				window.location.replace(window.location.origin + "/dashboard")
 			}
 		}

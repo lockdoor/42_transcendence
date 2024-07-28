@@ -43,62 +43,36 @@
         input[type="submit"]:hover {
             background-color: #3b9087;
         }
-        button {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            background-color: #4FD1C5;
-            color: #fff;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #3b9087;   
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Two-Factor Authentication</h1>
-        <form id="otp-form" action="{% url 'verify_totp' %}" method="post">
+        <h2>Fill the code sending to your email</h2>
+        <form id="code-form" action="{% url 'regenerate_qr' %}" method="post">
             {% csrf_token %}
-            <label for="otp">Enter OTP:</label>
-            <input type="text" id="otp" name="otp" required>
-            <input type="submit" value="Verify">
-        </form>
-        <form action="{% url 'pre_regen_page' %}">
-            {% csrf_token %}
-            <button type="submit">regenerate QR-code</button>
+            <label for="code">Enter code:</label>
+            <input type="text" id="code" name="code" required>
+            <input type="submit" value="Submit">
         </form>
     </div>
     <script>
-        document.getElementById('otp-form').addEventListener('submit', function(event) {
+        document.getElementById('code-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            var otp = document.getElementById('otp').value;
+            var code = document.getElementById('code').value;
             var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
-            fetch("{% url 'verify_totp' %}", {
+            fetch("{% url 'regenerate_qr' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrfToken
                 },
-                body: JSON.stringify({otp: otp})
+                body: JSON.stringify({code: code})
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === 'Login success') {
-                    // Save tokens to sessionStorage
-                    sessionStorage.setItem('access_token', data.access);
-                    sessionStorage.setItem('refresh_token', data.refresh);
-                    console.log("Access Token:", sessionStorage.getItem('access_token'));
-                    console.log("Refresh Token:", sessionStorage.getItem('refresh_token'));
-                    // Redirect to dashboard or any other page
-                    // window.location.href = "/api";
-                    // /api/access/:access/refresh/:refresh
-
-                    // window.location.href = `${window.location.origin}/dashboard`
-                    window.location.replace(`${window.location.origin}/dashboard`)
+                if (data.message === 'Regenerate QR-code Success') {
+                    window.location.replace(`${window.location.origin}/api/2fa-qr-page`)
                 } else {
                     alert(data.error);
                     window.location.href = "/";

@@ -44,6 +44,14 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', '10.19.243.95'
 SESSION_COOKIE_AGE = 7200  #seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+SITE_URL = 'http://localhost:8000'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
 # For JWT Token
 REST_FRAMEWORK = {
 
@@ -177,5 +185,5 @@ AUTH_USER_MODEL = 'backend.CustomUser'
 MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/user-media/'
 
-ALLOW_API_WITHOUT_AUTH = True
-ALLOW_API_WITHOUT_JWT = True
+ALLOW_API_WITHOUT_AUTH = False
+ALLOW_API_WITHOUT_JWT = False

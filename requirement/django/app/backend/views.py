@@ -2,10 +2,9 @@ import os
 import json
 from django.urls import reverse
 from django.conf import settings
-from .models import Notification, BlockedList
+from .models import Notification, BlockedList, PreRegister, ActivationCode, RegenerateCode
 from django.shortcuts import render, redirect
 from django.middleware.csrf import get_token
-from django.contrib.sessions.models import Session
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from authlib.integrations.requests_client import OAuth2Session
@@ -22,6 +21,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+
+import secrets
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.conf import settings
+from django.urls import reverse
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+
 
 class CustomRefreshToken(RefreshToken):
     @property
@@ -64,8 +72,14 @@ def index(request):
     return render(request, 'backend/login.html')
 
 
+def two_factor_auth_qr(request):
+    return render(request, 'backend/two_factor_auth_qr.html')
+
 def two_factor_auth(request):
     return render(request, 'backend/two_factor_auth.html')
+
+def regen_code(request):
+    return render(request, 'backend/regen_qr_code.html')
 
 def get_csrf_token_and_session_id(request):
     csrf_token = get_token(request)
@@ -232,7 +246,10 @@ def UserLogin(request):
             if settings.ALLOW_API_WITHOUT_JWT == False:
                 login(request, user)
                 user.save()
-                return JsonResponse({'message': '2fa'}, status=200)
+                if (user.totp_secret is None):
+                    return JsonResponse({'message': '2fa-qr'}, status=200)
+                else:
+                    return JsonResponse({'message': '2fa'}, status=200)
                 # return redirect (two_factor_auth) #change to message redirect to 2fa
             else:
                 login(request, user)
@@ -249,28 +266,28 @@ def UserLogin(request):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
 #1.2 POST /api/auth/register
-def UserRegister(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        avatar = request.FILES.get('avatar')
+def UserRegister(request, preUser, password):
+        username = preUser.username
+        password = password
+        avatar = preUser.avatar
+        email = preUser.email
         
+        preUser.delete()
         if not username or not password:
             return JsonResponse({'error': 'Both username and password are required'}, status=400)
         User = get_user_model()
         if User.objects.filter(username=username).exists():
             return JsonResponse({'error': 'Username already exists'}, status=400)
 
-        user = User.objects.create_user(username=username, password=password)
+        user = User.objects.create_user(username=username, password=password, email=email)
         if avatar:
             user.avatar = avatar
         login(request, user)
         user.is_online = True
         user.save()
         
-        return JsonResponse({'message': 'Create user success'}, status=201)
-    else:
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+        return JsonResponse({'success': True, 'redirect_url': reverse('two_factor_auth_qr')}, status=200)
+        # return JsonResponse({'message': 'Create user success'}, status=201)
 
 #1.3 POST /api/auth/logout
 def UserLogout(request):
@@ -321,18 +338,21 @@ def callback(request):
     user_info = client.get(settings.PROFILE_URL).json()
     username = user_info['login']
     user_id = user_info['id']
+    email = user_info['email']
     hash_password = make_password(f'{username}{user_id}')
 
     if User.objects.filter(username=username).exists():
         user = User.objects.get(username=username)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
     else:
-        user = User.objects.create_user(username=username, password=hash_password)
+        user = User.objects.create_user(username=username, password=hash_password, email=email)
     if settings.ALLOW_API_WITHOUT_JWT == False:
         login(request, user)
         user.save()
-        # return JsonResponse({'message': '2fa'}, status=200)
-        return redirect (two_factor_auth)
+        if (user.totp_secret is None):
+            return redirect (two_factor_auth_qr)
+        else:
+            return redirect (two_factor_auth)
     else:
         login(request, user)
         user.is_online = True
@@ -706,3 +726,131 @@ def DeleteNotification(request):
 
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+def generate_activation_code(lenght):
+    token = secrets.token_urlsafe(32)
+    if (lenght != 0):
+        return token[:lenght]
+    return token
+
+def recover_qr(request):
+    User = get_user_model()
+    user = User.objects.get(id=request.user.id)
+    
+    try:
+        RegenerateCode.objects.get(user=user)
+        code = RegenerateCode.objects.get(user=user).code
+    except RegenerateCode.DoesNotExist:
+        code = generate_activation_code(lenght=6)
+        RegenerateCode.objects.create(user=user, code=code)
+
+    subject = 'Recovery QR-code'
+    message = f' Use this code for regenerating QR-code: {code}'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [request.user.email]   
+    send_mail( subject, message, email_from, recipient_list )
+    return redirect (regen_code)
+
+def regenerate_qr_code(request):
+    data = json.loads(request.body)
+    code = data.get('code')
+    # code = request.POST.get('code')
+    User = get_user_model()
+    user = User.objects.get(id=request.user.id)
+    try:
+        stored_code = RegenerateCode.objects.get(user=user, code=code)
+    except RegenerateCode.DoesNotExist:
+        return JsonResponse({'error': 'Regenerate code is mismatch.'}, status=404)
+    if stored_code.is_expired():
+        stored_code.delete()
+        return JsonResponse({"error": "Activation link has expired."}, status=400)
+    stored_code.delete()
+    user.totp_secret = None
+    user.save()
+    # return redirect(two_factor_auth_qr)
+    return JsonResponse({'message': 'Regenerate QR-code Success'}, status=200)
+
+def activate_account_page(request):
+    return render(request, 'backend/activate_account.html')
+
+def final_register(request):
+    if request.method == 'POST':
+        code = request.POST.get('code')
+        password = request.POST.get('password')
+        
+        activation_code = get_object_or_404(ActivationCode, code=code)
+        if activation_code.is_expired():
+            activation_code.delete()
+            return JsonResponse({"error": "Activation link has expired."}, status=400)
+        user = activation_code.user
+        activation_code.delete()  # Remove the activation code once it's used
+        return UserRegister(request, user, password)
+        
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+def activate_account(request, code):      
+        activation_code = get_object_or_404(ActivationCode, code=code)
+        if activation_code.is_expired():
+            activation_code.delete()
+            return JsonResponse({"error": "Activation link has expired."}, status=400)
+
+        user = activation_code.user
+        
+        context = {
+            'code': code
+        }
+        return render(request, 'backend/activate_account.html', {'context': context})
+        # return HttpResponse("Your account has been activated successfully.")
+
+def generate_activation_code(lenght):
+    token = secrets.token_urlsafe(32)
+    if (lenght != 0):
+        return token[:lenght]
+    return token
+
+def send_activation_email(user, code):
+    activation_link = f"{settings.SITE_URL}{reverse('activate', kwargs={'code': code})}"
+    subject = 'Activate your account'
+    message = f'Hi {user.username},\n\nPlease activate your account using the following link:\n{activation_link}'
+    email_from = settings.EMAIL_HOST_USER
+    send_mail(subject, message, email_from, [user.email])
+
+def pre_register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        avatar = request.FILES.get('avatar')
+        
+        if not username:
+                return JsonResponse({'error': 'Both username and password are required'}, status=400)
+        User = get_user_model()
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username already exists'}, status=400)
+        
+        user = PreRegister.objects.create(username=username, email=email, avatar=avatar)
+        user.save()
+        code = generate_activation_code(lenght=0)
+        ActivationCode.objects.create(user=user, code=code)
+        
+        send_activation_email(user, code)
+        return JsonResponse({'message': 'Waiting for activation'}, status=200)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+def check_email(request):
+    return render(request, 'backend/check_email.html') 
+
+def pre_regen(request):
+    email = request.POST.get('email')
+    User = get_user_model()
+    try:
+        User.objects.get(email=email)
+        return JsonResponse({'success': True}, status=200)
+    except:
+        return JsonResponse({'success': False, 'error': 'Wrong email'}, status=400)
+    
+def pre_regen_page(request):
+    return render(request, 'backend/pre_regen.html')
