@@ -10,6 +10,14 @@ else
     python manage.py startapp chat
 fi
 
+if [ -f "manage.py" ];
+then
+    echo Database is ready
+else
+    echo Create new database...
+    python manage.py migrate
+fi
+
 python manage.py shell << EOF
 
 #Clean Regenerate Code
