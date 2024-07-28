@@ -44,6 +44,17 @@ label {
 	color: var(--dark-text-color);
 }
 
+#avatarCon {
+	width: 10rem;
+	height: 10rem;
+	overflow: hidden;
+	border-radius: var(--border-radius); 
+}
+
+#avatarCon img {
+	object-fit: cover;
+}
+
 #usernameCon {
 	margin-top: -0.5rem;
 }

@@ -34,7 +34,9 @@ export class ModalSignUp extends HTMLElement {
 						name="avatar" accept="image/*">
 				</div>
 				<div class="d-flex align-items-center justify-content-center mb-3">
-					<img id="profileImg" src="./static/frontend/images/default.png" alt="profile default" class="img-fluid " style="max-width: 200px;">
+					<div id="avatarCon" class="position-relative ">
+						<img id="profileImg" src="./static/frontend/images/default.png" alt="profile default" class="position-absolute top-0 start-0 w-100 h-100">
+					</div>
 				</div>
 				<button id="signUpBtn" class="btn container-fluid d-flex align-items-center justify-content-center" type="submit">SIGN UP</button>
 			</form>
