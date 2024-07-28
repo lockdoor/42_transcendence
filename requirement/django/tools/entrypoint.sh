@@ -10,7 +10,7 @@ else
     python manage.py startapp chat
 fi
 
-if [ -f "manage.py" ];
+if [ -f "db.sqlite3" ];
 then
     echo Database is ready
 else
