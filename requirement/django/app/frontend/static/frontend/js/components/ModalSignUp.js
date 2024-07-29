@@ -70,7 +70,7 @@ export class ModalSignUp extends HTMLElement {
 
 			if (response.status == 200) {
 				console.log(result)
-				window.location.replace(window.location.origin + "/api/check_email")
+				window.location.replace(window.location.origin + "/api/check-email")
 			}
 			else {
 				throw new Error(`${response.status} ${response.statusText} ${result.error}`);

@@ -847,7 +847,7 @@ def pre_regen(request):
     email = request.POST.get('email')
     User = get_user_model()
     try:
-        User.objects.get(email=email)
+        User.objects.get(id=request.user.id ,email=email)
         return JsonResponse({'success': True}, status=200)
     except:
         return JsonResponse({'success': False, 'error': 'Wrong email'}, status=400)

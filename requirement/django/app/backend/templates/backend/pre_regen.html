@@ -83,7 +83,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    location.replace(`${window.location.origin}/api/recover_qr`);
+                    location.replace(`${window.location.origin}/api/recover-qr`);
                 } else {
                     alert(data.error);
                     location.replace(`${window.location.origin}/`);
