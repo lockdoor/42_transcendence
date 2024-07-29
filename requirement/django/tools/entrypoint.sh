@@ -13,18 +13,13 @@ fi
 if [ -f "db.sqlite3" ];
 then
     echo Database is ready
-else
-    echo Create new database...
-    python manage.py migrate
-fi
 
-python manage.py shell << EOF
-
+    python manage.py shell << EOF
 #Clean Regenerate Code
 from backend.models import RegenerateCode, PreRegister, ActivationCode
 from django.contrib.sessions.models import Session
 
-print("Clearing all state...")
+print("Clearing all states...")
 
 #Clear expire regenration code for QR-code
 regen_codes = RegenerateCode.objects.all()
@@ -44,8 +39,12 @@ for pr in pre_registers:
 sessions = Session.objects.all()
 sessions.delete()
 
-print("All clean !")
+print("All clear !")
 
 EOF
+else
+    echo Create new database...
+    python manage.py migrate
+fi
 
 exec "$@"
