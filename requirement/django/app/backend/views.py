@@ -64,13 +64,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer  
 
 def index(request):   
-    # context = {
-    #     'access': request.session['access_token'],
-    #     'refresh': request.session['refresh_token']
-    # }
-    # return render(request, 'backend/login.html', {'token': context})
     return render(request, 'backend/login.html')
-
 
 def two_factor_auth_qr(request):
     return render(request, 'backend/two_factor_auth_qr.html')
@@ -153,15 +147,12 @@ def jwt_manual_validate(request):
         header = auth.get_header(request)
         if header is None:
             return ({'error': 'JWT token is missing'})
-            # return JsonResponse({'error': 'JWT token is missing'}, status=401)
         raw_token = auth.get_raw_token(header)
         jwt.decode(raw_token, settings.SECRET_KEY, algorithms=[settings.SIMPLE_JWT['ALGORITHM']])
     except ExpiredSignatureError:
         return ({'error': 'Token has expired'})
-        # return JsonResponse({'error': 'Token has expired'}, status=401)
     except Exception:
         return ({'error': 'Authentication failed'})
-        # return JsonResponse({'error': 'Authentication failed'}, status=401)
     return
 
 def generate_totp_secret(request):
@@ -213,7 +204,6 @@ def verify_totp(request):
                                 'refresh': refresh_token,
                                 'access': access_token,
                                 }, status=200)
-                # return redirect ('backend:index')
             else:
                 logout(request)
                 return JsonResponse({'error':"Invalid OTP. Please try again."}, status=401)
@@ -240,7 +230,6 @@ def UserLogin(request):
 
         if request.user.is_authenticated:
             return redirect ("frontend:dashboard")
-            # return JsonResponse({'error': 'User is already logged in'}, status=400)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -250,12 +239,10 @@ def UserLogin(request):
                     return JsonResponse({'message': '2fa-qr'}, status=200)
                 else:
                     return JsonResponse({'message': '2fa'}, status=200)
-                # return redirect (two_factor_auth) #change to message redirect to 2fa
             else:
                 login(request, user)
                 user.is_online = True
                 user.save()
-                # return redirect ("frontend:dashboard")
                 return JsonResponse({
                             'message': 'Login success',
                             'owner_id': user.id
@@ -287,7 +274,6 @@ def UserRegister(request, preUser, password):
         user.save()
         
         return JsonResponse({'success': True, 'redirect_url': reverse('two_factor_auth_qr')}, status=200)
-        # return JsonResponse({'message': 'Create user success'}, status=201)
 
 #1.3 POST /api/auth/logout
 def UserLogout(request):
@@ -318,7 +304,6 @@ def UserLogin42(request):
 def callback(request):
     if 'oauth_token' in request.session:
         return redirect ("frontend:dashboard")
-        # return JsonResponse({'error': 'User is already logged in'}, status=400)
     
     stored_state = request.session.get('oauth_state')
     received_state = request.GET.get('state')
@@ -362,7 +347,6 @@ def callback(request):
 #2.1.1 /api/users/:user_id/:owner_id/profile
 def UserProfile(request, user_id, owner_id):
     if request.method == 'GET':
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -391,7 +375,6 @@ def UserProfile(request, user_id, owner_id):
 #2.1.2 POST /api/users/update_avatar
 def UpdateUserAvatar(request):
     if request.method == 'POST':
-        # if request.user.is_authenticated:
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                 user_id = request.POST.get('user_id')
@@ -426,7 +409,6 @@ def BlockUser(request):
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
             user_id = data.get('user_id')
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -464,7 +446,6 @@ def UnblockUser(request):
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
             user_id = data.get('user_id')
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -498,7 +479,6 @@ def UnblockUser(request):
 #2.1.6 GET: /api/users/user_id/blocked_list
 def GetUserBlockedList(request, user_id):
     if request.method == 'GET':
-        #    if request.user.is_authenticated:
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                 if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -526,7 +506,6 @@ def GetUserBlockedList(request, user_id):
 #2.2.1 GET /api/users/user_id/friends
 def GetAllFriends(request, user_id):
     if request.method == 'GET':
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -555,7 +534,6 @@ def GetAllFriends(request, user_id):
 #2.2.2 GET: /api/users/user_id/friends/find_new
 def FindNewFriends(request, user_id):
     if request.method == 'GET':
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -586,7 +564,6 @@ def FindNewFriends(request, user_id):
 #2.3.1 GET /api/users/user_id/notifications
 def GetNotifications(request, user_id):
     if request.method == 'GET':
-        # if request.user.is_authenticated:
         if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
             if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                 if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -621,7 +598,6 @@ def AcceptFriend(request):
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
             user_id = data.get('user_id')
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -661,7 +637,6 @@ def AcceptFriend(request):
 def SendFriendRequest(request):
     if request.method == 'POST':
         try:
-            # if request.user.is_authenticated:
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
             user_id = data.get('user_id')
@@ -702,7 +677,6 @@ def DeleteNotification(request):
             data = json.loads(request.body)
             owner_id = data.get('owner_id')
             user_id = data.get('user_id')
-            # if request.user.is_authenticated:
             if settings.ALLOW_API_WITHOUT_AUTH or request.user.is_authenticated:
                 if request.user.is_authenticated or settings.ALLOW_API_WITHOUT_AUTH:
                     if settings.ALLOW_API_WITHOUT_JWT == False:
@@ -755,7 +729,6 @@ def recover_qr(request):
 def regenerate_qr_code(request):
     data = json.loads(request.body)
     code = data.get('code')
-    # code = request.POST.get('code')
     User = get_user_model()
     user = User.objects.get(id=request.user.id)
     try:
@@ -768,7 +741,6 @@ def regenerate_qr_code(request):
     stored_code.delete()
     user.totp_secret = None
     user.save()
-    # return redirect(two_factor_auth_qr)
     return JsonResponse({'message': 'Regenerate QR-code Success'}, status=200)
 
 def activate_account_page(request):
@@ -803,7 +775,6 @@ def activate_account(request, code):
             'code': code
         }
         return render(request, 'backend/activate_account.html', {'context': context})
-        # return HttpResponse("Your account has been activated successfully.")
 
 def generate_activation_code(lenght):
     token = secrets.token_urlsafe(32)
