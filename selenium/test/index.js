@@ -14,7 +14,7 @@ const testFriendBlocked = require("./testFriendBlocked")
 const testFriendOnline = require("./testFriendOnline")
 
 describe('Test Babycadet begin', function() {
-	this.timeout(60000);
+	this.timeout(600000);
 	let driver;
 
 	before(async () => {

@@ -54,6 +54,7 @@ testFriendOnline = async (driver) => {
 	await logout(driver)
 
 	await driver2.quit();
+
 }
 
 module.exports = testFriendOnline

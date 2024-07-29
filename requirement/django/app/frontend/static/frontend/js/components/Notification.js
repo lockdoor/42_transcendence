@@ -34,12 +34,15 @@ export class Notification extends HTMLElement{
 					</div>
 				</td>
 				<td>
-					<button id="${user.username}FriendAccept" data-user="${user.user_id}">
+					<button id="${user.username}FriendAccept" 
+						data-userid="${user.user_id}" 
+						data-avatar="${user.avatar}"
+						data-username="${user.username}">
 						<i class="uil uil-user-plus"></i> Accept
 					</button>
 				</td>
 				<td>
-				<button id="${user.username}FriendDecline" data-user="${user.user_id}">
+				<button id="${user.username}FriendDecline" data-userid="${user.user_id}">
 					<i class="uil uil-user-plus"></i> Decline
 				</button>
 			</td>
@@ -50,11 +53,11 @@ export class Notification extends HTMLElement{
 	friendDecline = async (e) => {
 		const payload = {
 			"owner_id": getUserId(),
-			"user_id": e.target.dataset.user
+			"user_id": e.target.dataset.userid
 		}
 		// console.log(payload)
 		const result = await fetchJson("friendDecline", "DELETE", 
-			"/api/users/notifications/delete", payload)
+			`${window.location.origin}/api/users/notifications/delete`, payload)
 		if (result) {
 			console.log(result)
 			this.fetchNotification()
@@ -62,20 +65,23 @@ export class Notification extends HTMLElement{
 	}
 
 	friendAccept = async (e) => {
+		// const {userid, username, avatar} = e.target.dataset
 		const payload = {
 			"owner_id": getUserId(),
-			"user_id": e.target.dataset.user
+			"user_id": e.target.dataset.userid
 		}
 		const result = await fetchJson("friendAccept", "POST", 
-		"/api/users/friends/accept", payload)
+		`${window.location.origin}/api/users/friends/accept`, payload)
 		if (result) {
-			console.log(result)
+			// console.log(result)
 			this.fetchNotification()
 			
 			//update friendsComponent
 			const dashBoard = document.getElementById("dashBoardComponent").shadowRoot
 			const friends = dashBoard.getElementById("friendsComponent")
 			friends.fetchFriends()
+			// console.log(userid, username, avatar)
+			// friends.append(userid, username, avatar)
 		}
 		
 	}
@@ -95,7 +101,7 @@ export class Notification extends HTMLElement{
 	fetchNotification = async() => {
 		const result = await fetchJson("fetchNotification", "GET", `/api/users/${getUserId()}/notifications`)
 		if (result) {
-			console.log(result)
+			// console.log(result)
 			this.render(result)
 		} else {
 			this.shadowRoot.getElementById("notificationTableBody").innerHTML = ""

@@ -25,17 +25,17 @@ def get_or_create_chatroom(request, username):
   
   User = get_user_model()
   other_user = User.objects.get(username=username)
-  my_chatrooms = request.user.chat_groups.filter(is_private=True)
+  if not other_user:
+    return JsonResponse({'error': 'username not found'}, status=404)
 
+  chatroom = None
+  my_chatrooms = request.user.chat_groups.filter(is_private=True)
   if my_chatrooms.exists():
-    for chatroom in my_chatrooms:
-        if other_user in chatroom.members.all():
-            chatroom = chatroom
+    for chat in my_chatrooms:
+        if other_user in chat.members.all():
+            chatroom = chat
             break
-        else:
-            chatroom = ChatGroup.objects.create(is_private=True)
-            chatroom.members.add(other_user, request.user)
-  else:
+  if not chatroom:
       chatroom = ChatGroup.objects.create(is_private=True)
       chatroom.members.add(other_user, request.user)
 
