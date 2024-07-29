@@ -68,6 +68,10 @@ export class Friend extends HTMLElement {
 				// console.log(obj.message)
 			}
 		});
+
+		this.socket.addEventListener('close', () => {
+			console.log(`friend ${this.dataset.username} has close websocket`)
+		})
 	}
 
 	fetchChatRoom = async () => {
@@ -83,9 +87,10 @@ export class Friend extends HTMLElement {
 			const liveChatComponent = dashBoardShadowRoot.getElementById("liveChatComponent")
 			const chatBtn = this.shadowRoot.getElementById("chatBtn")
 			chatBtn.addEventListener('click', ()=>{
-				liveChatComponent.setAttribute("data-chatroom", result.chatroom)
 				liveChatComponent.setAttribute("data-username", this.dataset.username)
 				liveChatComponent.setAttribute("data-userid", this.dataset.id)
+				liveChatComponent.setAttribute("data-avatar", this.dataset.avatar)
+				liveChatComponent.setAttribute("data-chatroom", result.chatroom)
 			})
 		}
 	}
@@ -104,6 +109,10 @@ export class Friend extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		console.log('has gone')
+		// console.log(`friend ${this.dataset.username} has gone`)
+		if (this.socket) {
+			this.socket.close();
+			this.socket = null; // Clean up reference
+		}
 	}
 }

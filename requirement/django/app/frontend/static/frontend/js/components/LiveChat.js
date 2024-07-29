@@ -17,7 +17,12 @@ export class LiveChat extends HTMLElement {
 			
 			<div id="liveChat">
 				<div id="header">
-					<h4>Live Chat</h4>
+					<div>
+						<h4>Live Chat</h4>
+						<div id="avatar">
+							
+						</div>
+					</div>
 					<div id="chatroom"></div>
 				</div>
 			</div>
@@ -94,6 +99,9 @@ export class LiveChat extends HTMLElement {
 			this.scrollToBottom()
 			this.shadowRoot.getElementById("messageForm")
 				.addEventListener('submit', this.sendMessage)
+			const avatar = document.createElement("img")
+			avatar.setAttribute("src", `${window.location.origin}${this.dataset.avatar}`)
+			this.shadowRoot.getElementById("avatar").innerHTML = avatar.outerHTML
 		}
 	}
 

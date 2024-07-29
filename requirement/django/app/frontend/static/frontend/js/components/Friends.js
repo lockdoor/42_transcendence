@@ -43,36 +43,33 @@ export class Friends extends HTMLElement {
 
 	fetchFriends = async () => {
 		const result = await fetchJson("fetchFriends", "GET", 
-			`/api/users/${getUserId()}/friends`)
+			`${window.location.origin}/api/users/${getUserId()}/friends`)
 		// console.log(result)
 		if (result) this.render(result)
 		else this.shadowRoot.getElementById('friendTableBody').innerHTML = ""
 
-		// live_chat still bug 
+
 		const dashBoardComponent = document.getElementById("dashBoardComponent")
 		let liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
 		liveChat.remove()
 		liveChat = document.createElement('live-chat-component')
 		liveChat.setAttribute("id", "liveChatComponent")
 		dashBoardComponent.shadowRoot.getElementById("div-right").appendChild(liveChat)
-		// liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
-		
 	};
+
+	appendFriend = (id, username, avatar) => {
+		const friend = document.createElement('friend-component')
+		friend.setAttribute("id", username)
+		friend.setAttribute("data-username", username)
+		friend.setAttribute("data-id", id)
+		friend.setAttribute("data-avatar", avatar)
+
+		this.shadowRoot.getElementById("friendTableBody").appendChild(friend)
+	}
 
 	render(friends) {
 		this.shadowRoot.getElementById('friendTableBody')
-		.innerHTML = ""
-		this.shadowRoot.getElementById('friendTableBody')
 			.innerHTML = this.generateRows(friends)
-
-		// add event for each button
-		// const parent = this.parentNode.parentNode.parentNode
-		// const mainFrame = parent.getElementById("mainFrame")
-		// friends.forEach(friend => {
-		// 	const friendProfileBtn = this.shadowRoot
-		// 		.getElementById(`${friend.username}ProfileBtn`)
-		// 	addNavigate(friendProfileBtn, mainFrame)
-		// })
 	}
 
 	connectedCallback() {

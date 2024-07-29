@@ -60,3 +60,11 @@
 	color: darkgrey;
 	font-style: italic;
 }
+
+#avatar img {
+	height: 40px;
+	width: 40px;
+	object-fit: cover;
+	border-radius: 30%;
+	
+}
