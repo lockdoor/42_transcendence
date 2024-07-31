@@ -63,9 +63,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer  
 
-def index(request):   
-    return render(request, 'backend/login.html')
-
 def two_factor_auth_qr(request):
     return render(request, 'backend/two_factor_auth_qr.html')
 
@@ -80,8 +77,6 @@ def get_csrf_token_and_session_id(request):
     session_id = request.session.session_key
     return JsonResponse({'csrf_token': csrf_token, 'sessionid': session_id}, status=200)
 
-def user_register(request):
-    return render(request, 'backend/register.html')
 
 def getUserProfile(User, user, owner, func):
     blocker = User.objects.get(id=user.id)

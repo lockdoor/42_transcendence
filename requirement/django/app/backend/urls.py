@@ -3,8 +3,6 @@ from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("user_register", views.user_register),
     path("auth/login", views.UserLogin, name="userLogin"),
     path("auth/login42", views.UserLogin42, name="userLogin42"),
     path("auth/callback", views.callback, name="callback"),
