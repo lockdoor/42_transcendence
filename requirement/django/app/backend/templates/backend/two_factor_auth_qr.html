@@ -92,11 +92,7 @@
                     sessionStorage.setItem('refresh_token', data.refresh);
                     console.log("Access Token:", sessionStorage.getItem('access_token'));
                     console.log("Refresh Token:", sessionStorage.getItem('refresh_token'));
-                    // Redirect to dashboard or any other page
-                    // window.location.href = "/api";
-                    // /api/access/:access/refresh/:refresh
 
-                    // window.location.href = `${window.location.origin}/dashboard`
                     window.location.replace(`${window.location.origin}/dashboard`)
                 } else {
                     alert(data.error);

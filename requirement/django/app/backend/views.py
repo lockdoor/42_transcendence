@@ -709,39 +709,47 @@ def generate_activation_code(lenght):
     return token
 
 def recover_qr(request):
-    User = get_user_model()
-    user = User.objects.get(id=request.user.id)
+    if request.user.is_authenticated:
+            User = get_user_model()
+            user = User.objects.get(id=request.user.id)
+            try:
+                RegenerateCode.objects.get(user=user)
+                code = RegenerateCode.objects.get(user=user).code
+            except RegenerateCode.DoesNotExist:
+                code = generate_activation_code(lenght=6)
+                RegenerateCode.objects.create(user=user, code=code)
+                
+            subject = 'Recovery QR-code'
+            message = f' Use this code for regenerating QR-code: {code}'
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [request.user.email]   
+            send_mail( subject, message, email_from, recipient_list )
+            return redirect (regen_code)
+    else:
+        return JsonResponse({'message': 'User is not logged in'}, status=401)
     
-    try:
-        RegenerateCode.objects.get(user=user)
-        code = RegenerateCode.objects.get(user=user).code
-    except RegenerateCode.DoesNotExist:
-        code = generate_activation_code(lenght=6)
-        RegenerateCode.objects.create(user=user, code=code)
-
-    subject = 'Recovery QR-code'
-    message = f' Use this code for regenerating QR-code: {code}'
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [request.user.email]   
-    send_mail( subject, message, email_from, recipient_list )
-    return redirect (regen_code)
 
 def regenerate_qr_code(request):
-    data = json.loads(request.body)
-    code = data.get('code')
-    User = get_user_model()
-    user = User.objects.get(id=request.user.id)
-    try:
-        stored_code = RegenerateCode.objects.get(user=user, code=code)
-    except RegenerateCode.DoesNotExist:
-        return JsonResponse({'error': 'Regenerate code is mismatch.'}, status=404)
-    if stored_code.is_expired():
+    if request.user.is_authenticated:
+        data = json.loads(request.body)
+        code = data.get('code')
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=request.user.id)
+            stored_code = RegenerateCode.objects.get(user=user, code=code)
+        except RegenerateCode.DoesNotExist:
+            return JsonResponse({'error': 'Regenerate code is mismatch.'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found.'}, status=404)
+        if stored_code.is_expired():
+            stored_code.delete()
+            return JsonResponse({"error": "Regenerate code has expired."}, status=400)
         stored_code.delete()
-        return JsonResponse({"error": "Activation link has expired."}, status=400)
-    stored_code.delete()
-    user.totp_secret = None
-    user.save()
-    return JsonResponse({'message': 'Regenerate QR-code Success'}, status=200)
+        user.totp_secret = None
+        user.save()
+        return JsonResponse({'message': 'Regenerate QR-code Success'}, status=200)
+    else:
+        return JsonResponse({'message': 'User is not logged in'}, status=401)
 
 def activate_account_page(request):
     return render(request, 'backend/activate_account.html')
@@ -815,13 +823,16 @@ def check_email(request):
     return render(request, 'backend/check_email.html') 
 
 def pre_regen(request):
-    email = request.POST.get('email')
-    User = get_user_model()
-    try:
-        User.objects.get(id=request.user.id ,email=email)
-        return JsonResponse({'success': True}, status=200)
-    except:
-        return JsonResponse({'success': False, 'error': 'Wrong email'}, status=400)
-    
+    if request.user.is_authenticated:
+        email = request.POST.get('email')
+        User = get_user_model()
+        try:
+            User.objects.get(id=request.user.id ,email=email)
+            return JsonResponse({'success': True}, status=200)
+        except:
+            return JsonResponse({'success': False, 'error': 'Wrong email'}, status=400)
+    else:
+        return JsonResponse({'message': 'User is not logged in'}, status=401)
+
 def pre_regen_page(request):
     return render(request, 'backend/pre_regen.html')
