@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'frontend',
     'backend',
     'chat',
+    'pong',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -177,5 +178,5 @@ AUTH_USER_MODEL = 'backend.CustomUser'
 MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/user-media/'
 
-ALLOW_API_WITHOUT_AUTH = False
-ALLOW_API_WITHOUT_JWT = False
+ALLOW_API_WITHOUT_AUTH = True
+ALLOW_API_WITHOUT_JWT = True

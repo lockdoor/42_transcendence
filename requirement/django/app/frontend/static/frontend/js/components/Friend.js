@@ -45,7 +45,7 @@ export class Friend extends HTMLElement {
 
 	setupWebsocket = (result) => {
 		this.socket = new WebSocket(
-			`${window.location.origin}/ws/chatroom/${result.chatroom}`)
+			`${window.location.origin}/ws/chatroom/private/${result.chatroom}`)
 
 		// Listen for messages
 		this.socket.addEventListener("message", (event) => {
