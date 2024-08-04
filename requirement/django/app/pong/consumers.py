@@ -8,16 +8,16 @@ class Player():
 		self.player_name = name
 		self.x = x
 		self.y = y
-		self.stat = "idle"
+		self.move = "idle"
 
 	def set_name(self, name):
 		self.player_name = name
 
-	def set_stat(self, stat):
-		self.stat = stat
+	def set_move(self, move):
+		self.move = move
 
-	def set_stat_idle(self):
-		self.stat = "idle"
+	def set_move_idle(self):
+		self.move = "idle"
 
 class Table():
 	def __init__(self, width, height):
@@ -50,18 +50,18 @@ class GameData():
 			self.ball.my *= -1
 
 	def player_move(self):
-		if self.player_one.stat == "right":
+		if self.player_one.move == "right":
 			self.player_one.y += self.player_speed
-		if self.player_one.stat == "left":
+		if self.player_one.move == "left":
 			self.player_one.y -= self.player_speed
-		if self.player_two.stat == "right":
+		if self.player_two.move == "right":
 			self.player_two.y -= self.player_speed
-		if self.player_two.stat == "left":
+		if self.player_two.move == "left":
 			self.player_two.y += self.player_speed
 
 	def player_idle(self):
-		self.player_one.set_stat_idle()
-		self.player_two.set_stat_idle()
+		self.player_one.set_move_idle()
+		self.player_two.set_move_idle()
 
 	def select_player(self, player):
 		if self.player_one.player_name == player:
@@ -88,29 +88,40 @@ class GameData():
 
 class PongConsumer(AsyncWebsocketConsumer):
 
-	game = GameData()
+	games = {}
+	tasks = {}
 
 	async def connect(self):
 		self.user = self.scope['user'] #get user from section
-		print(self.user.username, file=sys.stderr)
+		print(self.user.username, file=sys.stderr) #debug 
 		self.player_1 = self.scope['url_route']['kwargs']['player1']
 		self.player_2 = self.scope['url_route']['kwargs']['player2']
 		self.chatroom_name = f'{self.player_1}_{self.player_2}'
+		
+		if self.chatroom_name not in self.games:
+			self.games[self.chatroom_name] = GameData()
+		
+		self.game = self.games[self.chatroom_name]
+		
 		await self.accept()
 		await self.channel_layer.group_add(self.chatroom_name, self.channel_name)
-		#send_task should uniq
-		if not hasattr(self.channel_layer, 'send_task'):
+		
+		if self.chatroom_name not in self.tasks:
 			self.game.player_one.set_name(self.player_1)
 			self.game.player_two.set_name(self.player_2)
-			self.channel_layer.send_task = asyncio.create_task(self.send_game_data())
+			self.tasks[self.chatroom_name] = asyncio.create_task(self.send_game_data())
 		else:
 			await self.send(text_data=json.dumps(self.game.to_dict()))
 
 	async def disconnect(self, close_code):
 		await self.channel_layer.group_discard(self.chatroom_name, self.channel_name)
 		if not self.channel_layer.groups:
-			self.channel_layer.send_task.cancel()
-			del self.channel_layer.send_task
+			if self.chatroom_name in self.tasks:
+				self.tasks[self.chatroom_name].cancel()
+				del self.tasks[self.chatroom_name]
+			if self.chatroom_name in self.games:
+				del self.games[self.chatroom_name]
+	
 
 	async def send_game_data(self):
 		try:
@@ -137,6 +148,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 		text_data_json = json.loads(text_data)
 		player = self.game.select_player(self.user.username)
 		if player:
-			print(text_data_json, file=sys.stderr)
-			player.set_stat(text_data_json['move'])
+			# print(text_data_json, file=sys.stderr)
+			player.set_move(text_data_json['move'])
 			# Handle received data here (e.g., updating player positions)

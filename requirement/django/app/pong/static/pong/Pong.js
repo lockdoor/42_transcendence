@@ -172,7 +172,7 @@ export class Pong extends HTMLElement {
 		this.socket.addEventListener('message', (event) => {
 			
 			const data = JSON.parse(event.data)
-			// console.log(data)
+			console.log(data)
 			if(data.type === "game_data")
 				this.draw(data.data)
 			else {
