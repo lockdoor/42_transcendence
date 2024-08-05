@@ -17,7 +17,7 @@ export class Friend extends HTMLElement {
 			
 				<td>
 					<div class="profile">
-						<div class="profile-photo">
+						<div id="avatar" class="profile-photo">
 							<img src="${this.dataset.avatar}" alt="Profile Photo" 
 							onerror="this.onerror=null; this.src='/user-media/avatars/default.png';">
 						</div>
@@ -62,9 +62,25 @@ export class Friend extends HTMLElement {
 				}
 			}
 			else if (obj.type == "message_handler") {
-				const dashBoardComponent = document.getElementById("dashBoardComponent")
-				const liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
-				liveChat.updateChatRoom(obj)
+				try{
+					const dashBoardComponent = document.getElementById("dashBoardComponent")
+					const liveChat = dashBoardComponent.shadowRoot.getElementById("liveChatComponent")
+					// console.log(obj)
+					// console.log(liveChat.dataset.userid)
+					if (liveChat.dataset.username == this.dataset.username)
+						liveChat.updateChatRoom(obj)
+					else {
+						const avatar = this.shadowRoot.getElementById("avatar")
+						avatar.classList.add('new-message')
+						console.log("new message")
+					}
+				} catch(error) {
+					if (error instanceof TypeError) {
+						console.log("new message")
+					} else {
+						console.error("Unexpected error:", error)
+					}
+				}
 				// console.log(obj.message)
 			}
 		});
@@ -91,6 +107,10 @@ export class Friend extends HTMLElement {
 				liveChatComponent.setAttribute("data-userid", this.dataset.id)
 				liveChatComponent.setAttribute("data-avatar", this.dataset.avatar)
 				liveChatComponent.setAttribute("data-chatroom", result.chatroom)
+
+				// remove new-message
+				const avatar = this.shadowRoot.getElementById("avatar")
+				avatar.classList.remove('new-message')
 			})
 		}
 	}

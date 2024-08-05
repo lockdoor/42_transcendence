@@ -43,6 +43,10 @@ export class LiveChat extends HTMLElement {
 		`
 	}
 
+	// getFriendId(){
+	// 	return this.dataset.id
+	// }
+
 	/*
 	* this.dataset.userid : other user
 	*/
