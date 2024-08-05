@@ -29,6 +29,10 @@ td {
 	position: relative; 
 }
 
+.new-message {
+	border: 5px solid green;
+}
+
 .profile .profile-photo img {
 	display: block; /* Remove default inline spacing */
 	width: 100%; 

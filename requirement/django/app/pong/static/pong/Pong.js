@@ -1,22 +1,3 @@
-// class Ball {
-// 	constructor(ctx){
-// 		this.ctx = ctx
-// 		this.x = ctx.width / 2
-// 		this.y = ctx.height / 2
-// 		this.color = "blue"
-// 	}
-
-// 	draw(){
-// 		this.ctx.save()
-// 		this.ctx.beginPath()
-// 		this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true)
-// 		ctx.closePath()
-//     ctx.fillStyle = this.color;
-//     ctx.fill();
-// 		this.ctx.restore()
-// 	}
-// }
-
 export class Pong extends HTMLElement {
 	constructor () {
 		super()
@@ -44,17 +25,20 @@ export class Pong extends HTMLElement {
 			// x = this.scaleX * data.ball_y
 			y = this.scaleY * data.ball_x;
 			
-			if (this.user == data.player_two_name) {
+			if (this.user == data.player_one_name) {
 				y = canvas.height - y
 				x = canvas.width - x
 			}
 
 		} else {
-			// x = this.scaleX * data.ball_x;
-			x = canvas.width - (this.scaleX * data.ball_x);
-			y = canvas.height - (this.scaleY * data.ball_y);
+			x = this.scaleX * data.ball_x;
+			y = this.scaleY * data.ball_y
+
+			//invert
+			// x = canvas.width - (this.scaleX * data.ball_x);
+			// y = canvas.height - (this.scaleY * data.ball_y);
 		}
-		r = this.scaleY * 4
+		r = this.scaleY * data.ball_radius
 
 		ctx.beginPath()
 		ctx.arc( x, y, r, 0, Math.PI * 2, true)
@@ -65,6 +49,7 @@ export class Pong extends HTMLElement {
 	drawPlayer(canvas, ctx, data, isPortrait){
 		const paddingWidth = 10
 		const paddingRadius = this.scaleY * data.player_radius
+
 		if (isPortrait) {
 
 			// let upper, lower
@@ -172,12 +157,16 @@ export class Pong extends HTMLElement {
 		this.socket.addEventListener('message', (event) => {
 			
 			const data = JSON.parse(event.data)
-			console.log(data)
+			// console.log(data)
 			if(data.type === "game_data")
+			{
 				this.draw(data.data)
-			else {
-				console.log(data)
+				console.log(`x: ${data.data.ball_x},y: ${data.data.ball_y}`)
 			}
+			else if(data.type === "game_end") {
+				this.socket.close()
+			}
+			else console.log(data.data)
 		})
 
 		this.socket.addEventListener('open', () => {
@@ -188,6 +177,7 @@ export class Pong extends HTMLElement {
 		this.socket.addEventListener("close", () => {
 			if(this.user == this.dataset.player1 || this.user == this.dataset.player2)
 				document.removeEventListener('keydown', this.keyDownHandler)
+			console.log("websocket closed!")
 		})
 	}
 
