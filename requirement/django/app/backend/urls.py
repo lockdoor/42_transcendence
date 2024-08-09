@@ -36,4 +36,6 @@ urlpatterns = [
     path('check-email', views.check_email, name="check_email"),
     path('pre-regen-page', views.pre_regen_page, name='pre_regen_page'),
     path('pre-regen', views.pre_regen, name='pre_regen'),
+    path('get-totp', views.get_totp_secret, name='get_totp_secret'),
+    path('get-setup-key', views.get_setup_key, name='get-setup-key')
 ]

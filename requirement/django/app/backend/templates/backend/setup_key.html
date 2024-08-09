@@ -22,10 +22,6 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
         form {
             margin-top: 20px;
         }
@@ -56,18 +52,12 @@
             background-color: #3b9087;   
         }
     </style>
-</head>
+
 <body>
     <div class="container">
         <h2>Two-Factor Authentication</h2>
-        <div id="qr-code">
-            <img src="{% url 'generate_totp_secret' %}" alt="QR Code">
-        </div>
-        <form action="{% url 'get-setup-key' %}">
-            {% csrf_token %}
-            {% comment %} <a href="./get-setup-key">Use setup key instead</a> {% endcomment %}
-            <button type="submit">Use setup key</button>
-        </form>
+        <input type="hidden" vaule= <p id="setup-key"></p>
+        <button onclick="copyToClipboard()" style="background-color: grey; color: #fff;">🔐 <strong>SetupKey</strong></button>
         <form id="otp-form" action="{% url 'verify_totp' %}" method="post">
             {% csrf_token %}
             <label for="otp">Enter OTP:</label>
@@ -78,7 +68,6 @@
         <p>or</p>
         <a href="https://support.google.com/accounts/answer/1066447?hl=th&co=GENIE.Platform%3DiOS&oco=1" target=_blank>Learn more</a>
     </div>
-
     <script>
         document.getElementById('otp-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -110,7 +99,32 @@
             })
             .catch(error => console.error("Error:", error));
         });
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("{% url 'get_totp_secret' %}")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received data:", data);
+                    const setupKeyParagraph = document.getElementById('setup-key');
+                    setupKeyParagraph.textContent = data.key;
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                });
+        });
+        function copyToClipboard() {
+            const setupKey = document.getElementById('setup-key').textContent;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = setupKey;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('Setup key copied to clipboard!');
+        }
     </script>
-    
 </body>
-</html>

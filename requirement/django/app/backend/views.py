@@ -268,7 +268,6 @@ def UserRegister(request, preUser, password):
         login(request, user)
         user.is_online = True
         user.save()
-        
         return JsonResponse({'success': True, 'redirect_url': reverse('two_factor_auth_qr')}, status=200)
 
 #1.3 POST /api/auth/logout
@@ -853,3 +852,17 @@ def pre_regen(request):
 
 def pre_regen_page(request):
     return render(request, 'backend/pre_regen.html')
+
+def get_totp_secret(request):
+    if request.user.is_authenticated:
+        User = get_user_model()
+        user = User.objects.get(id=request.user.id)
+        return JsonResponse({'key': user.totp_secret})
+    else:
+        return JsonResponse({'message': 'User is not logged in'}, status=401)
+
+def get_setup_key(request):
+    if request.user.is_authenticated:
+        return render(request, 'backend/setup_key.html')
+    else:
+        return JsonResponse({'message': 'User is not logged in'}, status=401)

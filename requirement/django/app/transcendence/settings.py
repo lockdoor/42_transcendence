@@ -40,11 +40,12 @@ SECRET_KEY = 'django-insecure-y#kbgupk0%s9!y$@=qz-382qm%ndes!e#h&^bkw9yt0&k2#mu=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', '10.19.243.95', '192.168.12.57']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', '10.19.243.95', '192.168.12.57', '192.168.1.38']
 SESSION_COOKIE_AGE = 7200  #seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-SITE_URL = 'http://localhost:8000'
+# SITE_URL = 'http://localhost:8000'
+SITE_URL = 'http://192.168.1.38:8000'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
