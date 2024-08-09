@@ -23,12 +23,13 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import secrets
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.http import JsonResponse
 from django.conf import settings
 from django.urls import reverse
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 
 class CustomRefreshToken(RefreshToken):
@@ -715,10 +716,18 @@ def recover_qr(request):
                 RegenerateCode.objects.create(user=user, code=code)
                 
             subject = 'Recovery QR-code'
-            message = f' Use this code for regenerating QR-code: {code}'
+            html_message = render_to_string('backend/recover_code_email.html', {
+                'username': user.username,
+                'code':code
+            })
+
             email_from = settings.EMAIL_HOST_USER
-            recipient_list = [request.user.email]   
-            send_mail( subject, message, email_from, recipient_list )
+            recipient_list = [user.email]
+            email = EmailMultiAlternatives(subject, '', email_from, recipient_list)
+            email.attach_alternative(html_message, "text/html")
+    
+            # Send the email
+            email.send()
             return redirect (regen_code)
     else:
         return JsonResponse({'message': 'User is not logged in'}, status=401)
@@ -754,10 +763,13 @@ def final_register(request):
         code = request.POST.get('code')
         password = request.POST.get('password')
         
-        activation_code = get_object_or_404(ActivationCode, code=code)
+        try:
+            activation_code = ActivationCode.objects.get(code=code)
+        except ActivationCode.DoesNotExist:
+            return redirect ("frontend:dashboard")
         if activation_code.is_expired():
             activation_code.delete()
-            return JsonResponse({"error": "Activation link has expired."}, status=400)
+            return redirect ("frontend:dashboard")
         user = activation_code.user
         activation_code.delete()  # Remove the activation code once it's used
         return UserRegister(request, user, password)
@@ -765,12 +777,14 @@ def final_register(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-
-def activate_account(request, code):      
-        activation_code = get_object_or_404(ActivationCode, code=code)
+def activate_account(request, code):
+        try:
+            activation_code = ActivationCode.objects.get(code=code)
+        except ActivationCode.DoesNotExist:
+            return redirect ("frontend:dashboard")
         if activation_code.is_expired():
             activation_code.delete()
-            return JsonResponse({"error": "Activation link has expired."}, status=400)
+            return redirect ("frontend:dashboard")
 
         user = activation_code.user
         
@@ -788,9 +802,17 @@ def generate_activation_code(lenght):
 def send_activation_email(user, code):
     activation_link = f"{settings.SITE_URL}{reverse('activate', kwargs={'code': code})}"
     subject = 'Activate your account'
-    message = f'Hi {user.username},\n\nPlease activate your account using the following link:\n{activation_link}'
+
+    html_message = render_to_string('backend/activation_email.html', {
+        'username': user.username,
+        'activation_link': activation_link
+    })
     email_from = settings.EMAIL_HOST_USER
-    send_mail(subject, message, email_from, [user.email])
+    recipient_list = [user.email]
+    email = EmailMultiAlternatives(subject, '', email_from, recipient_list)
+    email.attach_alternative(html_message, "text/html")
+    # Send the email
+    email.send()
 
 def pre_register(request):
     if request.method == 'POST':
@@ -801,7 +823,7 @@ def pre_register(request):
         if not username:
                 return JsonResponse({'error': 'Both username and password are required'}, status=400)
         User = get_user_model()
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username=username).exists() or PreRegister.objects.filter(username=username).exists():
             return JsonResponse({'error': 'Username already exists'}, status=400)
         
         user = PreRegister.objects.create(username=username, email=email, avatar=avatar)

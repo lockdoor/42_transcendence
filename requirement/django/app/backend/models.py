@@ -116,7 +116,7 @@ class ActivationCode(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
-            self.expires_at = timezone.now() + datetime.timedelta(hours=1)  # Code valid for 24 hours
+            self.expires_at = timezone.now() + datetime.timedelta(hours=1)  # Code valid for 1 hours
         super().save(*args, **kwargs)
 
     def is_expired(self):
@@ -130,7 +130,7 @@ class RegenerateCode(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
-            self.expires_at = timezone.now() + datetime.timedelta(seconds=1800)  # Code valid for 24 hours
+            self.expires_at = timezone.now() + datetime.timedelta(seconds=180)  # Code valid for 3 mins
         super().save(*args, **kwargs)
 
     def is_expired(self):

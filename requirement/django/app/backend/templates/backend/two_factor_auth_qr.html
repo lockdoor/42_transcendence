@@ -69,7 +69,11 @@
             <input type="text" id="otp" name="otp" required>
             <input type="submit" value="Verify">
         </form>
+        <p>Check the OTP in your authenticator application</p>
+        <p>or</p>
+        <a href="https://support.google.com/accounts/answer/1066447?hl=th&co=GENIE.Platform%3DiOS&oco=1" target=_blank>Learn more</a>
     </div>
+
     <script>
         document.getElementById('otp-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -96,7 +100,7 @@
                     window.location.replace(`${window.location.origin}/dashboard`)
                 } else {
                     alert(data.error);
-                    window.location.href = "/";
+                    window.location.replace(`${window.location.origin}/`)
                 }
             })
             .catch(error => console.error("Error:", error));
